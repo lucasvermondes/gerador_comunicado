@@ -339,7 +339,7 @@
       const yyyy = now.getFullYear();
       const dd = String(now.getDate()).padStart(2, '0');
       const mm = String(now.getMonth() + 1).padStart(2, '0');
-      return { yyyy, mm, dd };
+      return { yyyy, mm,  };
     }
 
     function sanitizePart(value) {
@@ -722,7 +722,7 @@ if (src) {
       render();
     });
 
-    [fields.titulo, fields.imagemSelect, fields.localidade, fields.localidadeCustom, fields.evento, fields.servicosAfetados, fields.inicio, fields.fim, fields.mudancaNumero, fields.rfc].forEach(el => {
+    [fields.titulo, fields.evento, fields.servicosAfetados, fields.inicio, fields.fim, fields.mudancaNumero, fields.rfc].forEach(el => {
       el.addEventListener('input', render);
       el.addEventListener('change', render);
     });
@@ -730,11 +730,11 @@ if (src) {
     fields.textoRich.addEventListener('keyup', render);
     fields.textoRich.addEventListener('paste', () => setTimeout(render, 0));
 
-    fields.localidade.addEventListener('change', () => {
+    fields.localidade.addEventListener('change', render,() => {
       toggleLocalidadeCustom();
       render();
     });
-    fields.imagemSelect.addEventListener('change', () => {
+    fields.imagemSelect.addEventListener('change', render, () => {
       toggleImageUpload();
       render();
     });
