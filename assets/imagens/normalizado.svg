@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="270" viewBox="0 0 420 270">
+  <rect width="420" height="270" fill="#2e7d32"/>
+  <circle cx="210" cy="110" r="60" fill="#fff" opacity="0.95"/>
+  <path d="M178 112 L202 136 L246 88" fill="none" stroke="#2e7d32" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="210" y="215" text-anchor="middle" font-family="Calibri,Arial" font-size="32" font-weight="700" fill="#fff">NORMALIZADO</text>
+  <text x="210" y="244" text-anchor="middle" font-family="Calibri,Arial" font-size="20" font-weight="700" fill="#fff">ambiente disponível</text>
+</svg>

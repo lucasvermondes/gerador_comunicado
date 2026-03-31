@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="270" viewBox="0 0 420 270">
+  <rect width="420" height="270" fill="#edbf00"/>
+  <polygon points="210,38 302,170 118,170" fill="none" stroke="#000" stroke-width="10"/>
+  <line x1="210" y1="82" x2="210" y2="126" stroke="#000" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="210" cy="147" r="8" fill="#000"/>
+  <text x="210" y="208" text-anchor="middle" font-family="Calibri,Arial" font-size="28" font-weight="700" fill="#111">ATENÇÃO:</text>
+  <text x="210" y="235" text-anchor="middle" font-family="Calibri,Arial" font-size="22" font-weight="700" fill="#111">serviço temporariamente indisponível</text>
+</svg>
