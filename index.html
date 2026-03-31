@@ -722,10 +722,11 @@ if (src) {
       render();
     });
 
-    [fields.titulo, fields.evento, fields.servicosAfetados, fields.inicio, fields.fim, fields.mudancaNumero, fields.rfc].forEach(el => {
+    [fields.titulo, fields.evento, fields.servicosAfetados, fields.inicio, fields.fim, fields.mudancaNumero, fields.rfc, fields.localidadeCustom].forEach(el => {
       el.addEventListener('input', render);
       el.addEventListener('change', render);
     });
+    
     fields.textoRich.addEventListener('input', render);
     fields.textoRich.addEventListener('keyup', render);
     fields.textoRich.addEventListener('paste', () => setTimeout(render, 0));
@@ -760,6 +761,20 @@ if (src) {
     toggleLocalidadeCustom();
     toggleImageUpload();
     render();
+    fields.imagemSelect.addEventListener('change', () => {
+  if (fields.imagemSelect.value === '__upload__') {
+    customUploadWrap.classList.remove('hidden');
+  } else {
+    customUploadWrap.classList.add('hidden');
+  }
+});
+fields.localidade.addEventListener('change', () => {
+  if (fields.localidade.value === '__custom__') {
+    customLocalidadeWrap.classList.remove('hidden');
+  } else {
+    customLocalidadeWrap.classList.add('hidden');
+  }
+});
   </script>
 </body>
 </html>
