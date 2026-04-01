@@ -1,0 +1,155 @@
+:root {
+      --roxo: #300382;
+      --azul: #1f45a4;
+      --cinza: #ececec;
+      --texto: #111;
+      --borda: #d7d7d7;
+      --campo: #cfd6e4;
+      --painel: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Calibri, Arial, Helvetica, sans-serif;
+      color: var(--texto);
+      background: #f5f7fb;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      min-height: 100vh;
+    }
+    .panel {
+      background: var(--painel);
+      padding: 20px;
+      border-right: 1px solid var(--borda);
+      overflow: auto;
+    }
+    .panel h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      color: var(--roxo);
+    }
+    .panel p.desc {
+      margin: 0 0 16px;
+      color: #555;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .badge {
+      display: inline-block;
+      background: #ebe4ff; /* Fundo mais suave combinando com o novo roxo */
+      color: var(--roxo);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #333;
+    }
+    input[type="text"], select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--campo);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+      font-family: Calibri, Arial, Helvetica, sans-serif;
+    }
+    textarea { min-height: 88px; resize: vertical; line-height: 1.4; }
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px dashed #a6b1c7;
+      border-radius: 10px;
+      background: #fbfcff;
+    }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .tool-btn {
+      border: 1px solid #dcd3fc;
+      background: #f2eeff;
+      color: var(--roxo);
+      border-radius: 8px;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-weight: 700;
+      min-width: 40px;
+      font-size: 13px;
+    }
+    .editor {
+      min-height: 150px;
+      border: 1px solid var(--campo);
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+      font-size: 16px;
+      line-height: 1.45;
+      outline: none;
+      overflow: auto;
+      font-family: Calibri, Arial, Helvetica, sans-serif;
+    }
+    .editor:empty:before { content: attr(data-placeholder); color: #888; }
+    .filename-preview {
+      background: #faf8ff;
+      color: var(--roxo);
+      border: 1px solid #e3dafc;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    button.primary, button.secondary {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      font-family: Calibri, Arial, Helvetica, sans-serif;
+    }
+    button.primary { background: var(--roxo); color: white; }
+    button.secondary {
+      background: #f2eeff;
+      color: var(--roxo);
+      border: 1px solid #dcd3fc;
+    }
+    .preview-wrap {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px;
+      overflow: auto;
+    }
+    .preview-card {
+      background: #fff;
+      padding: 18px;
+      border-radius: 16px;
+      box-shadow: 0 10px 35px rgba(33, 41, 68, 0.12);
+      width: fit-content;
+    }
+    .preview-title { margin: 0 0 12px; font-size: 16px; color: #333; }
+    canvas {
+      display: block;
+      width: 500px;
+      max-width: calc(100vw - 510px);
+      height: auto;
+      border: 1px solid var(--borda);
+      background: #fff;
+    }
+    .hidden { display: none; }
+    @media (max-width: 1020px) {
+      .app { grid-template-columns: 1fr; }
+      .panel { border-right: none; border-bottom: 1px solid var(--borda); }
+      canvas { max-width: calc(100vw - 70px); }
+    }

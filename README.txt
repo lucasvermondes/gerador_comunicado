@@ -1,12 +1,4 @@
-# Gerador de Comunicados PNG • v4
-
-## O que mudou
-- O campo **Imagem central** agora fica **logo abaixo do Título**.
-- As imagens do dropdown agora vêm de uma **pasta do projeto**:
-  - `assets/imagens/`
-- O cadastro das opções do dropdown ficou em um arquivo separado:
-  - `config-imagens.js`
-- Continua existindo a opção **Outro (upload de imagem)**.
+# Gerador de Comunicados PNG • v5.2
 
 ## Como trocar ou adicionar artes
 ### Trocar uma imagem existente
