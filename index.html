@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerador de Comunicados PNG • v5</title>
+  <title>Gerador de Comunicados PNG • v5.2</title>
   <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
   <style>
     :root {
@@ -106,12 +106,6 @@
       font-family: Calibri, Arial, Helvetica, sans-serif;
     }
     .editor:empty:before { content: attr(data-placeholder); color: #888; }
-    .hint {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #666;
-      line-height: 1.4;
-    }
     .filename-preview {
       background: #faf8ff;
       color: var(--roxo);
@@ -173,7 +167,7 @@
 <body>
   <div class="app">
     <aside class="panel">
-      <div class="badge">Vermondes • Gerador de Comunicado PNG • v5</div>
+      <div class="badge">Vermondes • Gerador de Comunicado PNG • v5.2</div>
       <h1>Gerador de Comunicados PNG</h1>
       
       <div class="form-group">
@@ -367,12 +361,25 @@
       return fields.localidade.value.trim();
     }
 
+    // --- FUNÇÕES DE SEGURANÇA PARA TEXTO EM MOBILE ---
+    // Transforma espaços puros em Non-Breaking Spaces (\u00A0). 
+    // Isso impede que navegadores Webkit (iOS/Safari) engulam larguras de espaço.
+    function applySafeSpacing(text) {
+      return String(text).replace(/ /g, '\u00A0');
+    }
+
+    function measureTextSafe(text) {
+      if (!text) return 0;
+      return ctx.measureText(applySafeSpacing(text)).width;
+    }
+    // --------------------------------------------------
+
     function parseRichLines(editor) {
       function parseNode(node, inherited = { bold: false, italic: false, underline: false }) {
         const parts = [];
         if (node.nodeType === Node.TEXT_NODE) {
-          // Correção Mobile: Limpa caracteres invisíveis de teclado e quebras de linha manuais
-          const text = node.textContent.replace(/[\u00a0\u200b]/g, ' ').replace(/\n/g, ' ');
+          // Limpa caracteres invisíveis soltos que teclados mobile costumam gerar
+          const text = node.textContent.replace(/\u00a0/g, ' ').replace(/\u200b/g, '').replace(/\n/g, ' ');
           if (text) parts.push({ text, ...inherited });
           return parts;
         }
@@ -435,7 +442,7 @@
         let lineWidth = 0;
         words.forEach(word => {
           setFont(fontSize, word);
-          const width = ctx.measureText(word.text).width;
+          const width = measureTextSafe(word.text);
           if (lineWidth + width > maxWidth && currentLine.length && !/^\s+$/.test(word.text)) {
             wrapped.push(currentLine);
             currentLine = [];
@@ -466,7 +473,7 @@
       let line = '';
       words.forEach(word => {
         const test = line ? `${line} ${word}` : word;
-        if (ctx.measureText(test).width > maxWidth && line) {
+        if (measureTextSafe(test) > maxWidth && line) {
           lines.push(line);
           line = word;
         } else {
@@ -501,8 +508,9 @@
       const items = getInfoItems();
       items.forEach(item => {
         ctx.font = `700 ${fontSize}px Calibri, Arial, sans-serif`;
-        const labelWidth = ctx.measureText(item.label + ' ').width;
-        const lines = wrapPlainText(item.value, maxWidth - labelWidth, `${fontSize}px Calibri, Arial, sans-serif`);
+        const labelWidth = measureTextSafe(item.label + ' ');
+        const limitWidth = Math.max(10, maxWidth - labelWidth);
+        const lines = wrapPlainText(item.value, limitWidth, `${fontSize}px Calibri, Arial, sans-serif`);
         total += Math.max(1, lines.length) * lineHeight + gapAfterItem;
       });
       return { items, height: total, lineHeight, gapAfterItem };
@@ -535,15 +543,15 @@
       ctx.fillStyle = '#fff';
       words.forEach(word => {
         const test = line ? line + ' ' + word : word;
-        if (ctx.measureText(test).width > maxWidth && line) {
-          ctx.fillText(line, x, currentY);
+        if (measureTextSafe(test) > maxWidth && line) {
+          ctx.fillText(applySafeSpacing(line), x, currentY);
           line = word;
           currentY += lineHeight;
         } else {
           line = test;
         }
       });
-      if (line) ctx.fillText(line, x, currentY);
+      if (line) ctx.fillText(applySafeSpacing(line), x, currentY);
     }
 
     function drawRichText(wrappedLines, x, y, lineHeight, fontSize) {
@@ -552,8 +560,6 @@
         let currentX = x;
         if (!line.length) { currentY += Math.round(fontSize * 0.55); return; }
 
-        // Correção Mobile: Agrupar palavras do mesmo estilo antes de desenhar
-        // Isso evita que o kerning natural do celular sobreponha as letras ao desenhar palavra por palavra.
         let runs = [];
         let currentRun = null;
         
@@ -572,9 +578,8 @@
         runs.forEach(run => {
           setFont(fontSize, run);
           
-          // Mede o bloco inteiro e desenha de uma vez
-          const runWidth = ctx.measureText(run.text).width;
-          ctx.fillText(run.text, currentX, currentY);
+          const runWidth = measureTextSafe(run.text);
+          ctx.fillText(applySafeSpacing(run.text), currentX, currentY);
 
           if (run.underline && run.text.trim()) {
             const underlineY = currentY + Math.max(2, Math.round(fontSize * 0.10));
@@ -597,13 +602,17 @@
       items.forEach(item => {
         ctx.font = `700 ${fontSize}px Calibri, Arial, sans-serif`;
         ctx.fillStyle = '#111';
+        
         const labelText = item.label + ' ';
-        const labelWidth = ctx.measureText(labelText).width;
-        ctx.fillText(labelText, x, currentY);
-        const valueLines = wrapPlainText(item.value, maxWidth - labelWidth, `${fontSize}px Calibri, Arial, sans-serif`);
+        const labelWidth = measureTextSafe(labelText);
+        ctx.fillText(applySafeSpacing(labelText), x, currentY);
+        
+        const limitWidth = Math.max(10, maxWidth - labelWidth);
+        const valueLines = wrapPlainText(item.value, limitWidth, `${fontSize}px Calibri, Arial, sans-serif`);
+        
         ctx.font = `${fontSize}px Calibri, Arial, sans-serif`;
         valueLines.forEach((line, index) => {
-          ctx.fillText(line, x + labelWidth, currentY);
+          ctx.fillText(applySafeSpacing(line), x + labelWidth, currentY);
           if (index < valueLines.length - 1) currentY += lineHeight;
         });
         currentY += lineHeight + gapAfterItem;
@@ -627,7 +636,7 @@
         const logo = await loadImage('./assets/header.svg');
         ctx.drawImage(logo, 0, 0, 215, 62);
       } catch (e) {
-        // Fallback silencioso se logo não existir
+        // Fallback
       }
       
       drawWrappedHeader(fields.titulo.value, 230, 22, 250, 18);
@@ -666,9 +675,14 @@
           ctx.font = '400 14px Calibri, Arial, sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText('Imagem não encontrada', imgBox.x + imgBox.w / 2, imgBox.y + 72);
-          ctx.textAlign = 'start';
         }
       }
+
+      // ======= A CORREÇÃO ESTÁ AQUI =======
+      // Força o alinhamento à esquerda antes de desenhar os textos!
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      // ====================================
 
       drawRichText(layout.rich.wrapped, 36, layout.startY, layout.rich.lineHeight, layout.fontSize);
       drawInfoItems(layout.info.items, 36, layout.infoStartY, 430, layout.fontSize, layout.info.lineHeight, layout.info.gapAfterItem);
@@ -677,10 +691,10 @@
       ctx.fillStyle = '#111';
       ctx.textAlign = 'center';
       ctx.font = '400 12px Calibri, Arial, sans-serif';
-      ctx.fillText('Para suporte, ligue para o ramal 2222 ou envie um e-mail para', 250, footerY);
+      ctx.fillText(applySafeSpacing('Para suporte, ligue para o ramal 2222 ou envie um e-mail para'), 250, footerY);
       ctx.fillStyle = '#1f45a4';
       ctx.font = '400 16px Calibri, Arial, sans-serif';
-      ctx.fillText('helpdesk-sa@vallourec.com', 250, footerY + 20);
+      ctx.fillText(applySafeSpacing('helpdesk-sa@vallourec.com'), 250, footerY + 20);
       ctx.textAlign = 'center';
       ctx.fillStyle = '#1f45a4';
       ctx.fillRect(16, footerY + 28, 468, 8);
