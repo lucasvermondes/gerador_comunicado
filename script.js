@@ -289,16 +289,18 @@ if (highlightPicker) {
   });
 }
   function getWordsFromSegment(segment) {
-    return segment.text
-      .split(/(\s+)/)
-      .filter(token => token.length > 0)
-      .map(token => ({
-        text: token,
-        bold: segment.bold,
-        italic: segment.italic,
-        underline: segment.underline
-      }));
-  }
+  return segment.text
+    .split(/(\s+)/)
+    .filter(token => token.length > 0)
+    .map(token => ({
+      text: token,
+      bold: segment.bold,
+      italic: segment.italic,
+      underline: segment.underline,
+      color: segment.color || null   // <=== NOVO
+    }));
+}
+
 
   function setFont(size, style = {}) {
     const fontParts = [];
