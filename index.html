@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,22 +12,17 @@
 
 <body>
   <!-- Overlay de Login (apenas ID) -->
-<div id="loginOverlay" class="login-overlay">
-  <div class="login-box">
-    <h2>Acesso ao Gerador</h2>
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-box">
+      <h2>Acesso ao Gerador</h2>
 
-    <label for="loginId">ID TCS</label>
-    <input
-      type="text"
-      id="loginId"
-      placeholder="Somente números"
-      inputmode="numeric"
-    />
+      <label for="loginId">ID TCS</label>
+      <input type="text" id="loginId" placeholder="Somente números" inputmode="numeric" />
 
-    <button type="button" id="btnLogin">Entrar</button>
-    <div class="login-error" id="loginError"></div>
+      <button type="button" id="btnLogin">Entrar</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
   </div>
-</div>
 
   <!-- REMOVIDO: seletor antigo de idioma (select) -->
 
@@ -62,30 +58,28 @@
 
       <div class="form-group">
         <label>Descrição</label>
-        <div class="toolbar">
-          <button type="button" class="tool-btn" data-cmd="bold"><b>B</b></button>
-          <button type="button" class="tool-btn" data-cmd="italic"><i>I</i></button>
-          <button type="button" class="tool-btn" data-cmd="underline"><u>U</u></button>
+        <div class="toolbar" role="toolbar" aria-label="Formatação">
+          <button type="button" class="tool-btn" data-cmd="bold" aria-label="Negrito"><b>B</b></button>
+          <button type="button" class="tool-btn" data-cmd="italic" aria-label="Itálico"><i>/</i></button>
+          <button type="button" class="tool-btn" data-cmd="underline" aria-label="Sublinhado"><u>U</u></button>
+
           <button type="button" class="tool-btn" id="btnParagraph">Nova linha</button>
           <button type="button" class="tool-btn" id="btnClearFormatting">Limpar formato</button>
-          <!-- Lista com pontinho -->
-          <button type="button" class="tool-btn" data-cmd="insertUnorderedList" title="Lista com pontinho">• Lista</button>
-          <!-- Cor do Texto -->
-          <label class="tool-btn" title="Cor do texto">
-            <input type="color" id="colorPicker" value="#111111" />
-          <span>Texto</span>
-          </label>        
-          <!-- (Opcional) Marca-texto (fundo) -->
-          <label class="tool-btn" title="Cor de destaque (fundo)">
-            <input type="color" id="highlightPicker" value="#ffff00" />
-            <span>Fundo</span>
+
+          <button type="button" class="tool-btn" data-cmd="insertUnorderedList" aria-label="Lista com pontinho">•
+            Lista</button>
+
+          <label class="tool-swatch" title="Cor do texto">
+            <input type="color" id="colorPicker" value="#111111" aria-label="Cor do texto">
+            <span>Texto</span>
           </label>
 
+          <label class="tool-swatch" title="Cor de fundo (marca-texto)">
+            <input type="color" id="highlightPicker" value="#ffff00" aria-label="Cor de fundo">
+            <span>Fundo</span>
+          </label>
         </div>
-        <div
-          id="textoRich"
-          class="editor"
-          contenteditable="true"
+        <div id="textoRich" class="editor" contenteditable="true"
           placeholder="Digite o texto que aparece logo após a imagem...">
         </div>
       </div>
@@ -161,4 +155,5 @@
 
   <script src="script.js"></script>
 </body>
+
 </html>
