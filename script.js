@@ -627,7 +627,7 @@ function showUser(id) {
 
 // Verifica se já está autenticado
 function checkLogin() {
-  const savedId = localStorage.getItem('tcs_user');
+  const savedId = sessionStorage.getItem('tcs_user');
   if (savedId) {
     loginOverlay.style.display = 'none';
     showUser(savedId);
@@ -648,7 +648,7 @@ btnLogin.addEventListener('click', () => {
     return;
   }
 
-  localStorage.setItem('tcs_user', id);
+  sessionStorage.setItem('tcs_user', id);
   loginOverlay.style.display = 'none';
   showUser(id);
 });
