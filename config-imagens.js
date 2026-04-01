@@ -24,6 +24,31 @@ window.COMUNICADO_IMAGES = [
     label: 'Corretiva',
     src: 'assets/imagens/corretiva.png'
   },
+  {
+    id: 'instability',
+    label: 'Instability',
+    src: 'assets/imagens/instability.png'
+  },
+  {
+    id: 'unavailability',
+    label: 'Unavailability',
+    src: 'assets/imagens/unavailability.png'
+  },
+  {
+    id: 'planned_maintenance',
+    label: 'Maintenance',
+    src: 'assets/imagens/maintenance.png'
+  },
+  {
+    id: 'restored',
+    label: 'Service Restored',
+    src: 'assets/imagens/restored.png'
+  },
+  {
+    id: 'service_temp_unavailable',
+    label: 'Service Temporarily Unavailable',
+    src: 'assets/imagens/service_temp_unavailable.png'
+  },
   
   // Para adicionar novas artes:
   // 1) coloque o arquivo dentro de assets/imagens/
