@@ -569,7 +569,7 @@ if (highlightPicker) {
 
   return currentY;
 }
-``
+
 
   // Ajuste solicitado: primeira linha na frente do rótulo; demais abaixo, alinhadas à esquerda
   function drawInfoItems(items, x, y, maxWidth, fontSize, lineHeight, gapAfterItem) {
