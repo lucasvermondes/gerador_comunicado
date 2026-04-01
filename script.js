@@ -135,21 +135,37 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ==========================
      IMAGENS
   ========================== */
+  const IMAGE_NONE = '__none__';
+  const IMAGE_UPLOAD = '__upload__';
+  
   function populateImageSelect() {
-    if (!fields.imagemSelect) return;
-    fields.imagemSelect.innerHTML = '';
-    imageCatalog.forEach((img, index) => {
-      const option = document.createElement('option');
-      option.value = img.id;
-      option.textContent = img.label;
-      if (index === 0) option.selected = true;
-      fields.imagemSelect.appendChild(option);
-    });
-    const uploadOption = document.createElement('option');
-    uploadOption.value = '__upload__';
-    uploadOption.textContent = 'Outro (upload de imagem)';
-    fields.imagemSelect.appendChild(uploadOption);
-  }
+  if (!fields.imagemSelect) return;
+  fields.imagemSelect.innerHTML = '';
+
+  // 1) Sem imagem
+  const noneOption = document.createElement('option');
+  noneOption.value = IMAGE_NONE;
+  noneOption.textContent = 'Sem imagem (texto apenas)';
+  fields.imagemSelect.appendChild(noneOption);
+
+  // 2) Catálogo
+  imageCatalog.forEach((img) => {
+    const option = document.createElement('option');
+    option.value = img.id;
+    option.textContent = img.label;
+    fields.imagemSelect.appendChild(option);
+  });
+
+  // 3) Upload
+  const uploadOption = document.createElement('option');
+  uploadOption.value = IMAGE_UPLOAD;
+  uploadOption.textContent = 'Outro (upload de imagem)';
+  fields.imagemSelect.appendChild(uploadOption);
+
+  // Se quiser já abrir sem imagem por padrão:
+  // fields.imagemSelect.value = IMAGE_NONE;
+}
+
 
   function getImageSource() {
     if (!fields.imagemSelect) return null;
