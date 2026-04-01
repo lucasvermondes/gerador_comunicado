@@ -212,7 +212,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (current.length || !lines.length) lines.push(current);
     return lines.filter((line, idx, arr) => idx < arr.length - 1 || line.length || arr.length === 1);
   }
+// ===== Cor do texto selecionado =====
+const colorPicker = document.getElementById('colorPicker');
+if (colorPicker) {
+  colorPicker.addEventListener('input', () => {
+    fields.textoRich.focus();
+    // cor do texto
+    document.execCommand('foreColor', false, colorPicker.value);
+    render();
+  });
+}
 
+// ===== (Opcional) Marca-texto (fundo do texto) =====
+const highlightPicker = document.getElementById('highlightPicker');
+if (highlightPicker) {
+  highlightPicker.addEventListener('input', () => {
+    fields.textoRich.focus();
+    // Diferentes engines: tente hiliteColor, senão backColor
+    const color = highlightPicker.value;
+    const ok = document.execCommand('hiliteColor', false, color);
+    if (!ok) document.execCommand('backColor', false, color);
+    render();
+  });
+}
   function getWordsFromSegment(segment) {
     return segment.text
       .split(/(\s+)/)
