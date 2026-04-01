@@ -327,7 +327,7 @@ canvas {
   min-height: 16px;
 }
 
-/* ===== Toggle de Idioma PT / EN ===== */
+/* ===== Toggle PT/EN – bloco completo e autossuficiente ===== */
 .lang-toggle {
   display: flex;
   align-items: center;
@@ -336,9 +336,9 @@ canvas {
   font-size: 13px;
   color: #555;
 }
-
 .lang-label { font-weight: 600; }
 
+/* Wrapper do controle */
 .switch {
   position: relative;
   display: inline-block;
@@ -346,36 +346,47 @@ canvas {
   height: 22px;
 }
 
+/* O input cobre a área toda, mas fica invisível */
 .switch input {
+  position: absolute;
+  inset: 0;
   opacity: 0;
-  width: 0;
-  height: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
 }
 
+/* Trilha (fundo do toggle) */
 .slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
+  position: relative;              /* importante p/ posicionar a bolinha */
+  display: block;
+  width: 100%;
+  height: 100%;
   background-color: #ccc;
-  transition: 0.3s;
+  transition: background-color .3s ease;
   border-radius: 22px;
 }
 
-.slider:before {
-  position: absolute;
+/* Bolinha */
+.slider::before {
   content: "";
+  position: absolute;
   height: 18px;
   width: 18px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: 0.3s;
+  top: 2px;
+  left: 2px;                       /* posição quando DESmarcado (PT) */
+  background-color: #fff;
   border-radius: 50%;
+  transition: left .3s ease;       /* anima o deslocamento */
 }
 
-/* Ativo (EN) */
+/* Marcado (EN) – COR da trilha */
 .switch input:checked + .slider {
   background-color: #300382;
 }
 
-.switch input:checked + .
+/* Marcado (EN) – POSIÇÃO da bolinha */
+.switch input:checked + .slider::before {
+  left: 24px; /* 44 - 18 - 2 = 24 → direita */
+}
