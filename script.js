@@ -609,3 +609,49 @@ function drawWrappedHeader(text, xStart, headerHeight, maxWidth) {
     document.addEventListener('contextmenu', function (event) {
       event.preventDefault();
     });
+const LOGIN_ANSWER = 'sa - service desk';
+
+const loginOverlay = document.getElementById('loginOverlay');
+const btnLogin = document.getElementById('btnLogin');
+const loginIdInput = document.getElementById('loginId');
+const loginAnswerInput = document.getElementById('loginAnswer');
+const loginError = document.getElementById('loginError');
+
+// Mostra usuário conectado
+function showUser(id) {
+  const badge = document.querySelector('.badge');
+  if (badge) {
+    badge.textContent += ` • Usuário: ${id}`;
+  }
+}
+
+// Verifica se já está autenticado
+function checkLogin() {
+  const savedId = localStorage.getItem('tcs_user');
+  if (savedId) {
+    loginOverlay.style.display = 'none';
+    showUser(savedId);
+  }
+}
+
+btnLogin.addEventListener('click', () => {
+  const id = loginIdInput.value.trim();
+  const answer = loginAnswerInput.value.trim().toLowerCase();
+
+  if (!/^\d+$/.test(id)) {
+    loginError.textContent = 'ID TCS deve conter apenas números.';
+    return;
+  }
+
+  if (answer !== LOGIN_ANSWER) {
+    loginError.textContent = 'Resposta incorreta.';
+    return;
+  }
+
+  localStorage.setItem('tcs_user', id);
+  loginOverlay.style.display = 'none';
+  showUser(id);
+});
+
+checkLogin();
+``
