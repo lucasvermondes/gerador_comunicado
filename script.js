@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
   /* ==========================
      IDIOMA (PT / EN)
@@ -170,137 +169,114 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ==========================
-     PARSER RICH TEXT
+     PARSER RICH TEXT (com listas e cor)
   ========================== */
   function parseRichLines(editor) {
-  function parseNode(
-    node,
-    inherited = { bold: false, italic: false, underline: false, color: null, indentLevel: 0 }
-  ) {
-    const parts = [];
+    function parseNode(
+      node,
+      inherited = { bold: false, italic: false, underline: false, color: null, indentLevel: 0 }
+    ) {
+      const parts = [];
 
-    if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent
-        .replace(/\u00a0/g, ' ')
-        .replace(/\u200b/g, '')
-        .replace(/\n/g, ' ');
-      if (text) parts.push({ text, ...inherited });
-      return parts;
-    }
-
-    if (node.nodeType !== Node.ELEMENT_NODE) return parts;
-
-    const el = /** @type {HTMLElement} */ (node);
-    const tag = el.tagName.toLowerCase();
-
-    // Herança de estilo
-    const style = {
-      bold: inherited.bold || tag === 'b' || tag === 'strong',
-      italic: inherited.italic || tag === 'i' || tag === 'em',
-      underline: inherited.underline || tag === 'u',
-      color: inherited.color,
-      indentLevel: inherited.indentLevel || 0
-    };
-
-    // Cor via style inline ou <font color="">
-    // (execCommand('foreColor') costuma gerar <font color="..."> ou <span style="color:...">)
-    if (el.style && el.style.color) {
-      style.color = el.style.color;
-    } else if (tag === 'font' && el.getAttribute('color')) {
-      style.color = el.getAttribute('color');
-    }
-
-    // Listas: aumente nível de indent dentro de UL/OL
-    if (tag === 'ul' || tag === 'ol') {
-      for (const child of el.childNodes) {
-        parts.push(...parseNode(child, { ...style, indentLevel: (style.indentLevel || 0) + 1 }));
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent
+          .replace(/\u00a0/g, ' ')
+          .replace(/\u200b/g, '')
+          .replace(/\n/g, ' ');
+        if (text) parts.push({ text, ...inherited });
+        return parts;
       }
-      return parts;
-    }
 
-    // <li>: gera "• " + conteúdo + quebra de linha
-    if (tag === 'li') {
-      const level = style.indentLevel || 0;
-      // Indent visual (NBSP) conforme nível (2 NBSP por nível)
-      const indent = '\u00A0'.repeat(Math.max(0, level) * 2);
-      if (indent) parts.push({ text: indent, ...style });
+      if (node.nodeType !== Node.ELEMENT_NODE) return parts;
 
-      // Bullet
-      parts.push({ text: '• ', ...style });
+      const el = /** @type {HTMLElement} */ (node);
+      const tag = el.tagName.toLowerCase();
 
-      // Conteúdo do item
-      for (const child of el.childNodes) {
-        parts.push(...parseNode(child, style));
+      // Herança de estilo
+      const style = {
+        bold: inherited.bold || tag === 'b' || tag === 'strong',
+        italic: inherited.italic || tag === 'i' || tag === 'em',
+        underline: inherited.underline || tag === 'u',
+        color: inherited.color,
+        indentLevel: inherited.indentLevel || 0
+      };
+
+      // Cor via style inline ou <font color="">
+      // (execCommand('foreColor') costuma gerar <font color="..."> ou <span style="color:...">)
+      if (el.style && el.style.color) {
+        style.color = el.style.color;
+      } else if (tag === 'font' && el.getAttribute('color')) {
+        style.color = el.getAttribute('color');
       }
-      // Fim do item de lista = quebra de linha
-      parts.push({ lineBreak: true });
+
+      // Listas: aumenta nível de indent dentro de UL/OL
+      if (tag === 'ul' || tag === 'ol') {
+        for (const child of el.childNodes) {
+          parts.push(...parseNode(child, { ...style, indentLevel: (style.indentLevel || 0) + 1 }));
+        }
+        return parts;
+      }
+
+      // <li>: gera "• " + conteúdo + quebra de linha
+      if (tag === 'li') {
+        const level = style.indentLevel || 0;
+        // Indent visual (NBSP) conforme nível (2 NBSP por nível)
+        const indent = '\u00A0'.repeat(Math.max(0, level) * 2);
+        if (indent) parts.push({ text: indent, ...style });
+
+        // Bullet
+        parts.push({ text: '• ', ...style });
+
+        // Conteúdo do item
+        for (const child of el.childNodes) {
+          parts.push(...parseNode(child, style));
+        }
+        // Fim do item de lista = quebra de linha
+        parts.push({ lineBreak: true });
+        return parts;
+      }
+
+      if (tag === 'br') {
+        parts.push({ lineBreak: true });
+        return parts;
+      }
+
+      // Fluxo padrão
+      for (const child of el.childNodes) parts.push(...parseNode(child, style));
+      if (['div', 'p'].includes(tag)) parts.push({ lineBreak: true });
       return parts;
     }
 
-    if (tag === 'br') {
-      parts.push({ lineBreak: true });
-      return parts;
-    }
+    const raw = [];
+    for (const child of editor.childNodes) raw.push(...parseNode(child));
 
-    // Fluxo padrão
-    for (const child of el.childNodes) parts.push(...parseNode(child, style));
-    if (['div', 'p'].includes(tag)) parts.push({ lineBreak: true });
-    return parts;
+    const lines = [];
+    let current = [];
+    raw.forEach(part => {
+      if (part.lineBreak) {
+        lines.push(current);
+        current = [];
+      } else {
+        current.push(part);
+      }
+    });
+    if (current.length || !lines.length) lines.push(current);
+
+    return lines.filter((line, idx, arr) => idx < arr.length - 1 || line.length || arr.length === 1);
   }
 
-  const raw = [];
-  for (const child of editor.childNodes) raw.push(...parseNode(child));
-
-  const lines = [];
-  let current = [];
-  raw.forEach(part => {
-    if (part.lineBreak) {
-      lines.push(current);
-      current = [];
-    } else {
-      current.push(part);
-    }
-  });
-  if (current.length || !lines.length) lines.push(current);
-
-  return lines.filter((line, idx, arr) => idx < arr.length - 1 || line.length || arr.length === 1);
-}
-// ===== Cor do texto selecionado =====
-const colorPicker = document.getElementById('colorPicker');
-if (colorPicker) {
-  colorPicker.addEventListener('input', () => {
-    fields.textoRich.focus();
-    // cor do texto
-    document.execCommand('foreColor', false, colorPicker.value);
-    render();
-  });
-}
-
-// ===== (Opcional) Marca-texto (fundo do texto) =====
-const highlightPicker = document.getElementById('highlightPicker');
-if (highlightPicker) {
-  highlightPicker.addEventListener('input', () => {
-    fields.textoRich.focus();
-    // Diferentes engines: tente hiliteColor, senão backColor
-    const color = highlightPicker.value;
-    const ok = document.execCommand('hiliteColor', false, color);
-    if (!ok) document.execCommand('backColor', false, color);
-    render();
-  });
-}
   function getWordsFromSegment(segment) {
-  return segment.text
-    .split(/(\s+)/)
-    .filter(token => token.length > 0)
-    .map(token => ({
-      text: token,
-      bold: segment.bold,
-      italic: segment.italic,
-      underline: segment.underline,
-      color: segment.color || null   // <=== NOVO
-    }));
-}
-
+    return segment.text
+      .split(/(\s+)/)
+      .filter(token => token.length > 0)
+      .map(token => ({
+        text: token,
+        bold: segment.bold,
+        italic: segment.italic,
+        underline: segment.underline,
+        color: segment.color || null
+      }));
+  }
 
   function setFont(size, style = {}) {
     const fontParts = [];
@@ -516,60 +492,59 @@ if (highlightPicker) {
   }
 
   function drawRichText(wrappedLines, x, y, lineHeight, fontSize) {
-  let currentY = y;
+    let currentY = y;
 
-  wrappedLines.forEach(line => {
-    let currentX = x;
-    if (!line.length) { currentY += Math.round(fontSize * 0.55); return; }
+    wrappedLines.forEach(line => {
+      let currentX = x;
+      if (!line.length) { currentY += Math.round(fontSize * 0.55); return; }
 
-    // Agrupa runs com mesmo estilo
-    let runs = [];
-    let currentRun = null;
+      // Agrupa runs com mesmo estilo
+      let runs = [];
+      let currentRun = null;
 
-    line.forEach(part => {
-      if (!currentRun) {
-        currentRun = { ...part };
-      } else if (
-        currentRun.bold === part.bold &&
-        currentRun.italic === part.italic &&
-        currentRun.underline === part.underline &&
-        (currentRun.color || null) === (part.color || null)
-      ) {
-        currentRun.text += part.text;
-      } else {
-        runs.push(currentRun);
-        currentRun = { ...part };
-      }
+      line.forEach(part => {
+        if (!currentRun) {
+          currentRun = { ...part };
+        } else if (
+          currentRun.bold === part.bold &&
+          currentRun.italic === part.italic &&
+          currentRun.underline === part.underline &&
+          (currentRun.color || null) === (part.color || null)
+        ) {
+          currentRun.text += part.text;
+        } else {
+          runs.push(currentRun);
+          currentRun = { ...part };
+        }
+      });
+      if (currentRun) runs.push(currentRun);
+
+      runs.forEach(run => {
+        setFont(fontSize, run);
+
+        // Aplica cor do run (se houver)
+        ctx.fillStyle = run.color || '#111';
+
+        const runWidth = measureTextSafe(run.text);
+        ctx.fillText(applySafeSpacing(run.text), currentX, currentY);
+
+        if (run.underline && run.text.trim()) {
+          const underlineY = currentY + Math.max(2, Math.round(fontSize * 0.10));
+          ctx.beginPath();
+          ctx.lineWidth = Math.max(1, Math.round(fontSize * 0.06));
+          ctx.strokeStyle = run.color || '#111';
+          ctx.moveTo(currentX, underlineY);
+          ctx.lineTo(currentX + runWidth, underlineY);
+          ctx.stroke();
+        }
+        currentX += runWidth;
+      });
+
+      currentY += lineHeight;
     });
-    if (currentRun) runs.push(currentRun);
 
-    runs.forEach(run => {
-      setFont(fontSize, run);
-
-      // aplica cor do run (se houver)
-      ctx.fillStyle = run.color || '#111';
-
-      const runWidth = measureTextSafe(run.text);
-      ctx.fillText(applySafeSpacing(run.text), currentX, currentY);
-
-      if (run.underline && run.text.trim()) {
-        const underlineY = currentY + Math.max(2, Math.round(fontSize * 0.10));
-        ctx.beginPath();
-        ctx.lineWidth = Math.max(1, Math.round(fontSize * 0.06));
-        ctx.strokeStyle = run.color || '#111';
-        ctx.moveTo(currentX, underlineY);
-        ctx.lineTo(currentX + runWidth, underlineY);
-        ctx.stroke();
-      }
-      currentX += runWidth;
-    });
-
-    currentY += lineHeight;
-  });
-
-  return currentY;
-}
-
+    return currentY;
+  }
 
   // Ajuste solicitado: primeira linha na frente do rótulo; demais abaixo, alinhadas à esquerda
   function drawInfoItems(items, x, y, maxWidth, fontSize, lineHeight, gapAfterItem) {
@@ -727,12 +702,13 @@ if (highlightPicker) {
     render();
   }
 
-  // Toolbar de edição
+  // Toolbar de edição — B/I/U/Lista/Parágrafo/Remover formato
   document.querySelectorAll('[data-cmd]').forEach(btn => {
     btn.addEventListener('click', () => {
       fields.textoRich.focus();
       document.execCommand(btn.dataset.cmd, false, null);
       render();
+      setTimeout(updateToolbarState, 0);
     });
   });
 
@@ -741,6 +717,7 @@ if (highlightPicker) {
       fields.textoRich.focus();
       document.execCommand('insertHTML', false, '<div><br></div>');
       render();
+      setTimeout(updateToolbarState, 0);
     });
   }
 
@@ -749,69 +726,61 @@ if (highlightPicker) {
       fields.textoRich.focus();
       document.execCommand('removeFormat', false, null);
       render();
+      setTimeout(updateToolbarState, 0);
     });
   }
+
   // ===== Cor do texto selecionado =====
-const colorPicker = document.getElementById('colorPicker');
-if (colorPicker) {
-  colorPicker.addEventListener('input', () => {
-    fields.textoRich.focus();
-    document.execCommand('foreColor', false, colorPicker.value);
-    render();
-    updateToolbarState();
-  });
-}
-
-// ===== Marca-texto (fundo do texto) =====
-const highlightPicker = document.getElementById('highlightPicker');
-if (highlightPicker) {
-  highlightPicker.addEventListener('input', () => {
-    fields.textoRich.focus();
-    const color = highlightPicker.value;
-    const ok = document.execCommand('hiliteColor', false, color);
-    if (!ok) document.execCommand('backColor', false, color);
-    render();
-    updateToolbarState();
-  });
-}
-
-// ===== Atualiza estado ativo (B/I/U/Lista) =====
-function updateToolbarState() {
-  const map = [
-    { cmd: 'bold', sel: '[data-cmd="bold"]' },
-    { cmd: 'italic', sel: '[data-cmd="italic"]' },
-    { cmd: 'underline', sel: '[data-cmd="underline"]' },
-    { cmd: 'insertUnorderedList', sel: '[data-cmd="insertUnorderedList"]' },
-  ];
-  map.forEach(({ cmd, sel }) => {
-    const btn = document.querySelector(sel);
-    if (!btn) return;
-    let is = false;
-    try { is = document.queryCommandState(cmd); } catch {}
-    btn.classList.toggle('is-active', !!is);
-  });
-}
-
-// Recalcula quando o usuário muda seleção dentro do editor
-document.addEventListener('selectionchange', () => {
-  if (document.activeElement === fields.textoRich) {
-    updateToolbarState();
+  const colorPicker = document.getElementById('colorPicker');
+  if (colorPicker) {
+    colorPicker.addEventListener('input', () => {
+      fields.textoRich.focus();
+      document.execCommand('foreColor', false, colorPicker.value);
+      render();
+      updateToolbarState();
+    });
   }
-});
 
-// Gatilhos extras
-fields.textoRich.addEventListener('keyup', updateToolbarState);
-fields.textoRich.addEventListener('mouseup', updateToolbarState);
+  // ===== Marca-texto (fundo do texto) =====
+  const highlightPicker = document.getElementById('highlightPicker');
+  if (highlightPicker) {
+    highlightPicker.addEventListener('input', () => {
+      fields.textoRich.focus();
+      const color = highlightPicker.value;
+      const ok = document.execCommand('hiliteColor', false, color);
+      if (!ok) document.execCommand('backColor', false, color);
+      render();
+      updateToolbarState();
+    });
+  }
 
-// Garante atualização após cliques nos botões já existentes
-document.querySelectorAll('[data-cmd]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    setTimeout(updateToolbarState, 0);
+  // ===== Estado ativo dos botões (B/I/U/Lista) =====
+  function updateToolbarState() {
+    const map = [
+      { cmd: 'bold', sel: '[data-cmd="bold"]' },
+      { cmd: 'italic', sel: '[data-cmd="italic"]' },
+      { cmd: 'underline', sel: '[data-cmd="underline"]' },
+      { cmd: 'insertUnorderedList', sel: '[data-cmd="insertUnorderedList"]' },
+    ];
+    map.forEach(({ cmd, sel }) => {
+      const btn = document.querySelector(sel);
+      if (!btn) return;
+      let is = false;
+      try { is = document.queryCommandState(cmd); } catch {}
+      btn.classList.toggle('is-active', !!is);
+    });
+  }
+
+  // Recalcula ao mudar seleção dentro do editor
+  document.addEventListener('selectionchange', () => {
+    if (document.activeElement === fields.textoRich) {
+      updateToolbarState();
+    }
   });
-});
 
-// Chamada inicial
-updateToolbarState();
+  // Gatilhos extras
+  fields.textoRich.addEventListener('keyup', updateToolbarState);
+  fields.textoRich.addEventListener('mouseup', updateToolbarState);
 
   [
     fields.titulo,
