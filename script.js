@@ -63,7 +63,7 @@ let customImage = null;
 function t(key) {
   return i18n[currentLang][key] || key;
 }
-``
+
 function populateImageSelect() {
   fields.imagemSelect.innerHTML = '';
   imageCatalog.forEach((img, index) => {
@@ -569,7 +569,7 @@ ctx.fillText(
   250,
   footerY
 );
-``
+
 
 
   ctx.fillStyle = '#4A22A9';
