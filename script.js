@@ -173,45 +173,98 @@ document.addEventListener('DOMContentLoaded', () => {
      PARSER RICH TEXT
   ========================== */
   function parseRichLines(editor) {
-    function parseNode(node, inherited = { bold: false, italic: false, underline: false }) {
-      const parts = [];
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent.replace(/\u00a0/g, ' ').replace(/\u200b/g, '').replace(/\n/g, ' ');
-        if (text) parts.push({ text, ...inherited });
-        return parts;
-      }
-      if (node.nodeType !== Node.ELEMENT_NODE) return parts;
-      const tag = node.tagName.toLowerCase();
-      const style = {
-        bold: inherited.bold || tag === 'b' || tag === 'strong',
-        italic: inherited.italic || tag === 'i' || tag === 'em',
-        underline: inherited.underline || tag === 'u'
-      };
-      if (tag === 'br') {
-        parts.push({ lineBreak: true });
-        return parts;
-      }
-      for (const child of node.childNodes) parts.push(...parseNode(child, style));
-      if (['div', 'p'].includes(tag)) parts.push({ lineBreak: true });
+  function parseNode(
+    node,
+    inherited = { bold: false, italic: false, underline: false, color: null, indentLevel: 0 }
+  ) {
+    const parts = [];
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent
+        .replace(/\u00a0/g, ' ')
+        .replace(/\u200b/g, '')
+        .replace(/\n/g, ' ');
+      if (text) parts.push({ text, ...inherited });
       return parts;
     }
 
-    const raw = [];
-    for (const child of editor.childNodes) raw.push(...parseNode(child));
+    if (node.nodeType !== Node.ELEMENT_NODE) return parts;
 
-    const lines = [];
-    let current = [];
-    raw.forEach(part => {
-      if (part.lineBreak) {
-        lines.push(current);
-        current = [];
-      } else {
-        current.push(part);
+    const el = /** @type {HTMLElement} */ (node);
+    const tag = el.tagName.toLowerCase();
+
+    // Herança de estilo
+    const style = {
+      bold: inherited.bold || tag === 'b' || tag === 'strong',
+      italic: inherited.italic || tag === 'i' || tag === 'em',
+      underline: inherited.underline || tag === 'u',
+      color: inherited.color,
+      indentLevel: inherited.indentLevel || 0
+    };
+
+    // Cor via style inline ou <font color="">
+    // (execCommand('foreColor') costuma gerar <font color="..."> ou <span style="color:...">)
+    if (el.style && el.style.color) {
+      style.color = el.style.color;
+    } else if (tag === 'font' && el.getAttribute('color')) {
+      style.color = el.getAttribute('color');
+    }
+
+    // Listas: aumente nível de indent dentro de UL/OL
+    if (tag === 'ul' || tag === 'ol') {
+      for (const child of el.childNodes) {
+        parts.push(...parseNode(child, { ...style, indentLevel: (style.indentLevel || 0) + 1 }));
       }
-    });
-    if (current.length || !lines.length) lines.push(current);
-    return lines.filter((line, idx, arr) => idx < arr.length - 1 || line.length || arr.length === 1);
+      return parts;
+    }
+
+    // <li>: gera "• " + conteúdo + quebra de linha
+    if (tag === 'li') {
+      const level = style.indentLevel || 0;
+      // Indent visual (NBSP) conforme nível (2 NBSP por nível)
+      const indent = '\u00A0'.repeat(Math.max(0, level) * 2);
+      if (indent) parts.push({ text: indent, ...style });
+
+      // Bullet
+      parts.push({ text: '• ', ...style });
+
+      // Conteúdo do item
+      for (const child of el.childNodes) {
+        parts.push(...parseNode(child, style));
+      }
+      // Fim do item de lista = quebra de linha
+      parts.push({ lineBreak: true });
+      return parts;
+    }
+
+    if (tag === 'br') {
+      parts.push({ lineBreak: true });
+      return parts;
+    }
+
+    // Fluxo padrão
+    for (const child of el.childNodes) parts.push(...parseNode(child, style));
+    if (['div', 'p'].includes(tag)) parts.push({ lineBreak: true });
+    return parts;
   }
+
+  const raw = [];
+  for (const child of editor.childNodes) raw.push(...parseNode(child));
+
+  const lines = [];
+  let current = [];
+  raw.forEach(part => {
+    if (part.lineBreak) {
+      lines.push(current);
+      current = [];
+    } else {
+      current.push(part);
+    }
+  });
+  if (current.length || !lines.length) lines.push(current);
+
+  return lines.filter((line, idx, arr) => idx < arr.length - 1 || line.length || arr.length === 1);
+}
 // ===== Cor do texto selecionado =====
 const colorPicker = document.getElementById('colorPicker');
 if (colorPicker) {
