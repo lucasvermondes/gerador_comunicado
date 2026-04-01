@@ -268,64 +268,96 @@ const canvas = document.getElementById('preview');
 
     // --- FUNÇÃO COM FONTE FIXA, 3 LINHAS E CENTRALIZAÇÃO VERTICAL CORRIGIDA ---
 function drawWrappedHeader(text, xStart, headerHeight, maxWidth) {
-  const fontSize = 14; 
-  const lineHeight = 18; 
-  let lines = [];
+  const MAX_FONT = 16;
+  const MIN_FONT = 11;
+  const MAX_LINES = 3;
 
-  ctx.font = `700 ${fontSize}px Calibri, Arial, sans-serif`;
-  
-  // 1. Quebra o texto
-  const paragraphs = String(text || '').split('\n');
-  
-  for (let p of paragraphs) {
-    const words = p.split(/\s+/).filter(Boolean);
-    if (!words.length) {
-      lines.push(''); 
-      continue;
+  let chosen = null;
+
+  for (let fontSize = MAX_FONT; fontSize >= MIN_FONT; fontSize--) {
+    const lineHeight = Math.round(fontSize * 1.28);
+    ctx.font = `700 ${fontSize}px Calibri, Arial, sans-serif`;
+
+    let lines = [];
+    const paragraphs = String(text || '').split('\n');
+
+    for (let p of paragraphs) {
+      const words = p.split(/\s+/).filter(Boolean);
+      if (!words.length) {
+        lines.push('');
+        continue;
+      }
+
+      let currentLine = '';
+      for (let word of words) {
+        const testLine = currentLine ? currentLine + ' ' + word : word;
+        if (measureTextSafe(testLine) > maxWidth) {
+          if (currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            lines.push(word);
+            currentLine = '';
+          }
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
     }
-    
+
+    if (lines.length <= MAX_LINES) {
+      chosen = { lines, fontSize, lineHeight };
+      break;
+    }
+  }
+
+  // Fallback extremo: força 3 linhas com reticências
+  if (!chosen) {
+    const fontSize = MIN_FONT;
+    const lineHeight = Math.round(fontSize * 1.28);
+    ctx.font = `700 ${fontSize}px Calibri, Arial, sans-serif`;
+
+    let lines = [];
+    const words = String(text || '').split(/\s+/).filter(Boolean);
     let currentLine = '';
+
     for (let word of words) {
       const testLine = currentLine ? currentLine + ' ' + word : word;
       if (measureTextSafe(testLine) > maxWidth) {
-        if (currentLine) {
-          lines.push(currentLine);
-          currentLine = word;      
-        } else {
-          lines.push(word);
-          currentLine = '';
-        }
+        lines.push(currentLine);
+        currentLine = word;
+        if (lines.length === MAX_LINES) break;
       } else {
         currentLine = testLine;
       }
     }
-    if (currentLine) {
-      lines.push(currentLine); 
+    if (lines.length < MAX_LINES && currentLine) {
+      lines.push(currentLine);
     }
+
+    if (lines.length === MAX_LINES) {
+      lines[MAX_LINES - 1] =
+        lines[MAX_LINES - 1].replace(/\s+\S*$/, '') + '...';
+    }
+
+    chosen = { lines, fontSize, lineHeight };
   }
 
-  // 2. Trava o máximo em 3 linhas
-  if (lines.length > 3) {
-    lines = lines.slice(0, 3);
-    lines[2] = lines[2].replace(/\s+\S*$/, '') + '...';
-  }
+  const { lines, fontSize, lineHeight } = chosen;
 
-  // 3. NOVO CÁLCULO DE CENTRALIZAÇÃO VERTICAL
+  // ---- Centralização vertical perfeita ----
   const totalTextHeight = lines.length * lineHeight;
-  
-  // Como vamos usar o 'middle', o Y inicial será a metade do espaço livre + a metade de uma linha
-  let currentY = (headerHeight - totalTextHeight) / 2 + (lineHeight / 2);
-  
-  const centerX = xStart + (maxWidth / 2);
+  let currentY =
+    (headerHeight - totalTextHeight) / 2 + lineHeight / 2;
 
-  // 4. Prepara a caneta do Canvas
+  const centerX = xStart + maxWidth / 2;
+
   ctx.fillStyle = '#fff';
-  ctx.textAlign = 'center'; 
-  
-  // AQUELA ERA A VILÃ: Mudamos a referência vertical para o meio da letra!
-  ctx.textBaseline = 'middle'; 
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `700 ${fontSize}px Calibri, Arial, sans-serif`;
 
-  // 5. Desenha as linhas na tela
   lines.forEach(line => {
     if (line) {
       ctx.fillText(applySafeSpacing(line), centerX, currentY, maxWidth);
