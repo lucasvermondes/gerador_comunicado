@@ -19,6 +19,11 @@ window.COMUNICADO_IMAGES = [
     label: 'Serviço Restabelecido',
     src: 'assets/imagens/servico_restabelecido.png'
   },
+  {
+    id: 'corretiva',
+    label: 'Corretiva',
+    src: 'assets/imagens/corretiva.png'
+  },
   
   // Para adicionar novas artes:
   // 1) coloque o arquivo dentro de assets/imagens/
