@@ -1,12 +1,14 @@
-:root {
-      --roxo: #300382;
-      --azul: #1f45a4;
-      --cinza: #ececec;
-      --texto: #111;
-      --borda: #d7d7d7;
-      --campo: #cfd6e4;
-      --painel: #ffffff;
-    }
+
+* ---------- Variáveis de tema (opcional) ---------- */
+:root{
+  --brand: #300382;
+  --brand-100: #F1ECFF;  /* roxo clarinho do tema */
+  --brand-200: #E3DAFF;  /* hover */
+  --text: #1A1A1A;
+  --border: #D9D5E6;
+  --btn-bg: #F8F6FF;
+}
+
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -73,43 +75,116 @@
       border-radius: 10px;
       background: #fbfcff;
     }
-    .toolbar {
+    
+/* ---------- Toolbar (container) ---------- */
+.toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
+  margin-top: 6px;
 }
 
-.tool-swatch {
+
+
+tool-swatch {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 6px;
-  border: 1px solid #dadada;
-  border-radius: 6px;
-  background: #fff;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--brand-100);
+  color: var(--brand);
+  font: 600 14px/1 Calibri, Arial, Helvetica, sans-serif;
 }
 
-.tool-swatch input[type="color"] {
-  width: 24px;
-  height: 24px;
-  appearance: none;
-  border: none;
+.tool-swatch span {
+  line-height: 1;
+}
+
+/* Dimensões e aparência do color picker */
+.tool-swatch input[type="color"]{
+  width: 40px;
+  height: 22px;
   padding: 0;
-  background: none;
+  border: 2px solid #444;     /* borda escurinha como no print */
+  border-radius: 5px;
+  background: #fff;
   cursor: pointer;
 }
-    .tool-btn {
-      border: 1px solid #dcd3fc;
-      background: #f2eeff;
-      color: var(--roxo);
-      border-radius: 8px;
-      padding: 7px 10px;
-      cursor: pointer;
-      font-weight: 700;
-      min-width: 40px;
-      font-size: 13px;
-    }
+
+/* Ajuste do swatch interno (Chrome/Edge) */
+.tool-swatch input[type="color"]::-webkit-color-swatch-wrapper{
+  padding: 0;
+  border-radius: 3px;
+}
+.tool-swatch input[type="color"]::-webkit-color-swatch{
+  border: none;
+  border-radius: 3px;
+}
+
+/* Firefox */
+.tool-swatch input[type="color"]::-moz-color-swatch{
+  border: none;
+  border-radius: 3px;
+}
+
+    
+/* ---------- Botão padrão da toolbar ---------- */
+.tool-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--brand-100);
+  color: var(--brand);
+  font: 600 14px/1 Calibri, Arial, Helvetica, sans-serif;
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+tool-btn:hover {
+  background: var(--brand-200);
+  border-color: var(--brand-200);
+  box-shadow: 0 0 0 2px rgba(48,3,130,.08) inset;
+}
+
+.tool-btn:active {
+  transform: translateY(0.5px);
+}
+
+.tool-btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.tool-btn.is-active {
+  background: var(--brand-200);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+* Ajustes tipográficos para B/I/U dentro do botão */
+.tool-btn b,
+.tool-btn i,
+.tool-btn u {
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+* O itálico do ícone “/” */
+.tool-btn i { font-style: italic; }
+
+
     .editor {
       min-height: 150px;
       border: 1px solid var(--campo);
@@ -283,4 +358,13 @@
 .switch input:checked + .slider:before {
   transform: translateX(22px);
 }
-``
+
+/* ---------- Responsividade leve ---------- */
+@media (max-width: 420px){
+  .tool-btn, .tool-swatch{
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 8px;
+  }
+}
+
