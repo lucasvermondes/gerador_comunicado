@@ -68,6 +68,19 @@
           <button type="button" class="tool-btn" data-cmd="underline"><u>U</u></button>
           <button type="button" class="tool-btn" id="btnParagraph">Nova linha</button>
           <button type="button" class="tool-btn" id="btnClearFormatting">Limpar formato</button>
+          <!-- Lista com pontinho -->
+          <button type="button" class="tool-btn" data-cmd="insertUnorderedList" title="Lista com pontinho">• Lista</button>
+          <!-- Cor do Texto -->
+          <label class="tool-swatch" title="Cor do texto">
+            <input type="color" id="colorPicker" value="#111111" />
+          <span>Texto</span>
+          </label>        
+          <!-- (Opcional) Marca-texto (fundo) -->
+          <label class="tool-swatch" title="Cor de destaque (fundo)">
+            <input type="color" id="highlightPicker" value="#ffff00" />
+            <span>Fundo</span>
+          </label>
+
         </div>
         <div
           id="textoRich"
