@@ -673,49 +673,52 @@ render();
 document.addEventListener('contextmenu', function (event) {
   event.preventDefault();
 });
-const LOGIN_ANSWER = 'sa - service desk';
-
+// ===== LOGIN POR SESSÃO (apenas ID) =====
 const loginOverlay = document.getElementById('loginOverlay');
 const btnLogin = document.getElementById('btnLogin');
 const loginIdInput = document.getElementById('loginId');
-const loginAnswerInput = document.getElementById('loginAnswer');
 const loginError = document.getElementById('loginError');
 
-// Mostra usuário conectado
+// Mostra usuário conectado no badge
 function showUser(id) {
   const badge = document.querySelector('.badge');
-  if (badge) {
+  if (badge && !badge.textContent.includes('Usuário:')) {
     badge.textContent += ` • Usuário: ${id}`;
   }
 }
 
-// Verifica se já está autenticado
+// Verifica se já há sessão ativa nesta aba
 function checkLogin() {
   const savedId = sessionStorage.getItem('tcs_user');
   if (savedId) {
     loginOverlay.style.display = 'none';
     showUser(savedId);
+  } else {
+    // Garante que o overlay esteja visível se não houver sessão
+    loginOverlay.style.display = 'flex';
   }
 }
 
-btnLogin.addEventListener('click', () => {
-  const id = loginIdInput.value.trim();
-  const answer = loginAnswerInput.value.trim().toLowerCase();
+// Tenta logar (somente ID numérico)
+function tryLogin() {
+  const id = (loginIdInput.value || '').trim();
 
   if (!/^\d+$/.test(id)) {
     loginError.textContent = 'ID TCS deve conter apenas números.';
     return;
   }
 
-  if (answer !== LOGIN_ANSWER) {
-    loginError.textContent = 'Resposta incorreta.';
-    return;
-  }
-
   sessionStorage.setItem('tcs_user', id);
   loginOverlay.style.display = 'none';
   showUser(id);
+  loginError.textContent = '';
+}
+
+// Eventos
+btnLogin?.addEventListener('click', tryLogin);
+loginIdInput?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') tryLogin();
 });
 
+// Executa na carga do script
 checkLogin();
-``
