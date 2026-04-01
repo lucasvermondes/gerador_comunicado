@@ -22,7 +22,12 @@ const i18n = {
       'For support, call 2222 or 0800 042 1195 or send an email to',
   }
 };
+const langSelect = document.getElementById('langSelect');
 
+langSelect.addEventListener('change', () => {
+  currentLang = langSelect.value;
+  render();
+});
 const canvas = document.getElementById('preview');
 const ctx = canvas.getContext('2d');
 
