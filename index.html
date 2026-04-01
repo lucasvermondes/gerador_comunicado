@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerador de Comunicados PNG • v5.5.0 </title>
-  <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
-  <link rel="stylesheet" href="styles.css" />
-  <script src="config-imagens.js"></script>
+  <title>Gerador de Comunicados PNG • v5.5.0</title>
+
+  <link rel="icon" type="image/svg+xml" href="./assetsscript>
 </head>
 
 <body>
@@ -32,19 +31,17 @@
         placeholder="Digite a resposta"
       />
 
-      <button id="btnLogin">Entrar</button>
+      <button type="button" id="btnLogin">Entrar</button>
       <div class="login-error" id="loginError"></div>
     </div>
   </div>
 
-  <!-- REMOVIDO: seletor antigo de idioma (select) -->
-
   <div class="app">
     <aside class="panel">
-      <div class="badge">Gerador de Comunicado PNG • v5.5.0 </div>
+      <div class="badge">Gerador de Comunicado PNG • v5.5.0</div>
       <h1>Gerador de Comunicados PNG</h1>
 
-      <!-- 🔥 Toggle de Idioma PT | EN (novo) -->
+      <!-- 🔥 Toggle de Idioma PT | EN -->
       <div class="lang-toggle" aria-label="Language selector">
         <span class="lang-label">PT</span>
         <label class="switch">
@@ -82,7 +79,7 @@
           id="textoRich"
           class="editor"
           contenteditable="true"
-          placeholder="Digite o texto que aparece logo após a imagem...">
+          data-placeholder="Digite o texto que aparece logo após a imagem...">
         </div>
       </div>
 
@@ -155,6 +152,7 @@
     </main>
   </div>
 
+  <!-- ✅ Scripts corretos -->
   <script src="script.js"></script>
 </body>
 </html>
