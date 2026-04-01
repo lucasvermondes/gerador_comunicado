@@ -256,7 +256,6 @@
       <div class="form-group">
         <label>Nome do arquivo gerado</label>
         <div class="filename-preview" id="filenamePreview"></div>
-        <!-- <div class="hint">Formato de exibição: <strong>ANO/DIA/MÊS - RFC - Título</strong>. No arquivo salvo, barras viram hífens para compatibilidade com Windows.</div> -->
       </div>
 
       <div class="actions">
@@ -372,7 +371,8 @@
       function parseNode(node, inherited = { bold: false, italic: false, underline: false }) {
         const parts = [];
         if (node.nodeType === Node.TEXT_NODE) {
-          const text = node.textContent.replace(/\u00a0/g, ' ');
+          // Correção Mobile: Limpa caracteres invisíveis de teclado e quebras de linha manuais
+          const text = node.textContent.replace(/[\u00a0\u200b]/g, ' ').replace(/\n/g, ' ');
           if (text) parts.push({ text, ...inherited });
           return parts;
         }
@@ -551,19 +551,41 @@
       wrappedLines.forEach(line => {
         let currentX = x;
         if (!line.length) { currentY += Math.round(fontSize * 0.55); return; }
+
+        // Correção Mobile: Agrupar palavras do mesmo estilo antes de desenhar
+        // Isso evita que o kerning natural do celular sobreponha as letras ao desenhar palavra por palavra.
+        let runs = [];
+        let currentRun = null;
+        
         line.forEach(part => {
-          setFont(fontSize, part);
-          ctx.fillText(part.text, currentX, currentY);
-          if (part.underline && part.text.trim()) {
+          if (!currentRun) {
+            currentRun = { ...part };
+          } else if (currentRun.bold === part.bold && currentRun.italic === part.italic && currentRun.underline === part.underline) {
+            currentRun.text += part.text;
+          } else {
+            runs.push(currentRun);
+            currentRun = { ...part };
+          }
+        });
+        if (currentRun) runs.push(currentRun);
+
+        runs.forEach(run => {
+          setFont(fontSize, run);
+          
+          // Mede o bloco inteiro e desenha de uma vez
+          const runWidth = ctx.measureText(run.text).width;
+          ctx.fillText(run.text, currentX, currentY);
+
+          if (run.underline && run.text.trim()) {
             const underlineY = currentY + Math.max(2, Math.round(fontSize * 0.10));
             ctx.beginPath();
             ctx.lineWidth = Math.max(1, Math.round(fontSize * 0.06));
             ctx.strokeStyle = '#111';
             ctx.moveTo(currentX, underlineY);
-            ctx.lineTo(currentX + part.width, underlineY);
+            ctx.lineTo(currentX + runWidth, underlineY);
             ctx.stroke();
           }
-          currentX += part.width;
+          currentX += runWidth;
         });
         currentY += lineHeight;
       });
@@ -601,55 +623,52 @@
       ctx.fillStyle = '#300382';
       ctx.fillRect(0, 0, canvas.width, 62);
 
-      const logo = await loadImage('./assets/header.svg');
-      ctx.drawImage(logo, 0, 0, 215, 62);
+      try {
+        const logo = await loadImage('./assets/header.svg');
+        ctx.drawImage(logo, 0, 0, 215, 62);
+      } catch (e) {
+        // Fallback silencioso se logo não existir
+      }
+      
       drawWrappedHeader(fields.titulo.value, 230, 22, 250, 18);
 
       const imgBox = { x: 138, y: 76, w: 230, h: 150 };
-      /* ctx.fillStyle = '#ffffff';
-      ctx.fillRect(imgBox.x, imgBox.y, imgBox.w, imgBox.h); */
-      
 
       const src = getImageSource();
-if (src) {
-  try {
-    const img = await loadImage(src);
+      if (src) {
+        try {
+          const img = await loadImage(src);
 
-    // Mantém proporção real da imagem
-    const imgRatio = img.width / img.height;
-    const boxRatio = imgBox.w / imgBox.h;
+          const imgRatio = img.width / img.height;
+          const boxRatio = imgBox.w / imgBox.h;
 
-    let drawW, drawH;
+          let drawW, drawH;
 
-    if (imgRatio > boxRatio) {
-      // imagem mais larga
-      drawW = imgBox.w;
-      drawH = imgBox.w / imgRatio;
-    } else {
-      // imagem mais alta
-      drawH = imgBox.h;
-      drawW = imgBox.h * imgRatio;
-    }
+          if (imgRatio > boxRatio) {
+            drawW = imgBox.w;
+            drawH = imgBox.w / imgRatio;
+          } else {
+            drawH = imgBox.h;
+            drawW = imgBox.h * imgRatio;
+          }
 
-    // Centraliza dentro do box
-    const drawX = imgBox.x + (imgBox.w - drawW) / 2;
-    const drawY = imgBox.y + (imgBox.h - drawH) / 2;
+          const drawX = imgBox.x + (imgBox.w - drawW) / 2;
+          const drawY = imgBox.y + (imgBox.h - drawH) / 2;
 
-    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+          ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-  } catch (err) {
-    ctx.fillStyle = '#f3f3f3';
-    ctx.fillRect(imgBox.x, imgBox.y, imgBox.w, imgBox.h);
-    ctx.strokeStyle = '#b5b5b5';
-    ctx.strokeRect(imgBox.x, imgBox.y, imgBox.w, imgBox.h);
-    ctx.fillStyle = '#666';
-    ctx.font = '400 14px Calibri, Arial, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Imagem não encontrada', imgBox.x + imgBox.w / 2, imgBox.y + 72);
-    ctx.fillText('Verifique config-imagens.js', imgBox.x + imgBox.w / 2, imgBox.y + 92);
-    ctx.textAlign = 'start';
-  }
-}
+        } catch (err) {
+          ctx.fillStyle = '#f3f3f3';
+          ctx.fillRect(imgBox.x, imgBox.y, imgBox.w, imgBox.h);
+          ctx.strokeStyle = '#b5b5b5';
+          ctx.strokeRect(imgBox.x, imgBox.y, imgBox.w, imgBox.h);
+          ctx.fillStyle = '#666';
+          ctx.font = '400 14px Calibri, Arial, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Imagem não encontrada', imgBox.x + imgBox.w / 2, imgBox.y + 72);
+          ctx.textAlign = 'start';
+        }
+      }
 
       drawRichText(layout.rich.wrapped, 36, layout.startY, layout.rich.lineHeight, layout.fontSize);
       drawInfoItems(layout.info.items, 36, layout.infoStartY, 430, layout.fontSize, layout.info.lineHeight, layout.info.gapAfterItem);
@@ -662,8 +681,6 @@ if (src) {
       ctx.fillStyle = '#1f45a4';
       ctx.font = '400 16px Calibri, Arial, sans-serif';
       ctx.fillText('helpdesk-sa@vallourec.com', 250, footerY + 20);
-      ctx.fillStyle = '#111';
-      ctx.fillText('', 347, footerY + 20);
       ctx.textAlign = 'center';
       ctx.fillStyle = '#1f45a4';
       ctx.fillRect(16, footerY + 28, 468, 8);
@@ -731,11 +748,11 @@ if (src) {
     fields.textoRich.addEventListener('keyup', render);
     fields.textoRich.addEventListener('paste', () => setTimeout(render, 0));
 
-    fields.localidade.addEventListener('change', render,() => {
+    fields.localidade.addEventListener('change', () => {
       toggleLocalidadeCustom();
       render();
     });
-    fields.imagemSelect.addEventListener('change', render, () => {
+    fields.imagemSelect.addEventListener('change', () => {
       toggleImageUpload();
       render();
     });
@@ -761,20 +778,7 @@ if (src) {
     toggleLocalidadeCustom();
     toggleImageUpload();
     render();
-    fields.imagemSelect.addEventListener('change', () => {
-  if (fields.imagemSelect.value === '__upload__') {
-    customUploadWrap.classList.remove('hidden');
-  } else {
-    customUploadWrap.classList.add('hidden');
-  }
-});
-fields.localidade.addEventListener('change', () => {
-  if (fields.localidade.value === '__custom__') {
-    customLocalidadeWrap.classList.remove('hidden');
-  } else {
-    customLocalidadeWrap.classList.add('hidden');
-  }
-});
+
   </script>
 </body>
 </html>
