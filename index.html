@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,43 +10,49 @@
 </head>
 
 <body>
+  <!-- Overlay de Login -->
   <div id="loginOverlay" class="login-overlay">
-  <div class="login-box">
-    <h2>Acesso ao Gerador</h2>
+    <div class="login-box">
+      <h2>Acesso ao Gerador</h2>
 
-    <label for="loginId">ID TCS</label>
-    <input
-      type="text"
-      id="loginId"
-      placeholder="Somente números"
-      inputmode="numeric"
-    />
+      <label for="loginId">ID TCS</label>
+      <input
+        type="text"
+        id="loginId"
+        placeholder="Somente números"
+        inputmode="numeric"
+      />
 
-    <label for="loginAnswer">
-      Qual nome da fila no Jira do Service Desk?
-    </label>
-    <input
-      type="text"
-      id="loginAnswer"
-      placeholder="Digite a resposta"
-    />
+      <label for="loginAnswer">
+        Qual nome da fila no Jira do Service Desk?
+      </label>
+      <input
+        type="text"
+        id="loginAnswer"
+        placeholder="Digite a resposta"
+      />
 
-    <button id="btnLogin">Entrar</button>
-    <div class="login-error" id="loginError"></div>
+      <button id="btnLogin">Entrar</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
   </div>
-</div>
-  <div class="form-group">
-  <label for="langSelect">Idioma / Language</label>
-  <select id="langSelect">
-    <option value="pt">Português</option>
-    <option value="en">English</option>
-  </select>
-</div>
+
+  <!-- REMOVIDO: seletor antigo de idioma (select) -->
 
   <div class="app">
     <aside class="panel">
       <div class="badge">Gerador de Comunicado PNG • v5.5.0 </div>
       <h1>Gerador de Comunicados PNG</h1>
+
+      <!-- 🔥 Toggle de Idioma PT | EN (novo) -->
+      <div class="lang-toggle" aria-label="Language selector">
+        <span class="lang-label">PT</span>
+        <label class="switch">
+          <input type="checkbox" id="langToggle" aria-label="Toggle language PT/EN">
+          <span class="slider"></span>
+        </label>
+        <span class="lang-label">EN</span>
+      </div>
 
       <div class="form-group">
         <label for="titulo">Título do comunicado</label>
@@ -73,7 +78,11 @@
           <button type="button" class="tool-btn" id="btnParagraph">Nova linha</button>
           <button type="button" class="tool-btn" id="btnClearFormatting">Limpar formato</button>
         </div>
-        <div id="textoRich" class="editor" contenteditable="true" placeholder="Digite o texto que aparece logo após a imagem...">
+        <div
+          id="textoRich"
+          class="editor"
+          contenteditable="true"
+          placeholder="Digite o texto que aparece logo após a imagem...">
         </div>
       </div>
 
@@ -145,7 +154,7 @@
       </div>
     </main>
   </div>
+
   <script src="script.js"></script>
 </body>
-
 </html>
