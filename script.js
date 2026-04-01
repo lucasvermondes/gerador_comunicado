@@ -471,7 +471,7 @@ function drawWrappedHeader(text, xStart, headerHeight, maxWidth) {
       ctx.fillStyle = '#111';
       ctx.textAlign = 'center';
       ctx.font = '400 12px Calibri, Arial, sans-serif';
-      ctx.fillText(applySafeSpacing('Para suporte, ligue para o ramal 2222 ou envie um e-mail para'), 250, footerY);
+      ctx.fillText(applySafeSpacing('Para suporte, ligue para 2222 ou 0800 042 1195 ou envie um e-mail para'), 250, footerY);
       ctx.fillStyle = '#4A22A9';
       ctx.font = '400 16px Calibri, Arial, sans-serif';
       ctx.fillText(applySafeSpacing('helpdesk-sa@vallourec.com'), 250, footerY + 20);
