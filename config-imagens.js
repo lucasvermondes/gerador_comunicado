@@ -24,6 +24,11 @@ window.COMUNICADO_IMAGES = [
     label: 'Corretiva',
     src: 'assets/imagens/corretiva.png'
   },
+  /* {
+    id: 'sem-imagem',
+    label: 'Sem Imagem (Apenas Texto)',
+    src: 'assets/imagens/corretiva.png'
+  }, */
   {
     id: 'instability',
     label: 'Instability',
