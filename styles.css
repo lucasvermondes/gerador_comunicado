@@ -73,7 +73,32 @@
       border-radius: 10px;
       background: #fbfcff;
     }
-    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.tool-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 1px solid #dadada;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.tool-swatch input[type="color"] {
+  width: 24px;
+  height: 24px;
+  appearance: none;
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
     .tool-btn {
       border: 1px solid #dcd3fc;
       background: #f2eeff;
