@@ -266,24 +266,73 @@ const canvas = document.getElementById('preview');
       return chosen;
     }
 
-    function drawWrappedHeader(text, x, y, maxWidth, lineHeight) {
-      const words = String(text || '').split(/\s+/).filter(Boolean);
-      let line = '';
-      let currentY = y;
-      ctx.font = '700 16px Calibri, Arial, sans-serif';
-      ctx.fillStyle = '#fff';
-      words.forEach(word => {
-        const test = line ? line + ' ' + word : word;
-        if (measureTextSafe(test) > maxWidth && line) {
-          ctx.fillText(applySafeSpacing(line), x, currentY);
-          line = word;
-          currentY += lineHeight;
-        } else {
-          line = test;
-        }
-      });
-      if (line) ctx.fillText(applySafeSpacing(line), x, currentY);
+    // --- FUNÇÃO COM FONTE FIXA, 3 LINHAS E CENTRALIZAÇÃO VERTICAL CORRIGIDA ---
+function drawWrappedHeader(text, xStart, headerHeight, maxWidth) {
+  const fontSize = 14; 
+  const lineHeight = 18; 
+  let lines = [];
+
+  ctx.font = `700 ${fontSize}px Calibri, Arial, sans-serif`;
+  
+  // 1. Quebra o texto
+  const paragraphs = String(text || '').split('\n');
+  
+  for (let p of paragraphs) {
+    const words = p.split(/\s+/).filter(Boolean);
+    if (!words.length) {
+      lines.push(''); 
+      continue;
     }
+    
+    let currentLine = '';
+    for (let word of words) {
+      const testLine = currentLine ? currentLine + ' ' + word : word;
+      if (measureTextSafe(testLine) > maxWidth) {
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = word;      
+        } else {
+          lines.push(word);
+          currentLine = '';
+        }
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) {
+      lines.push(currentLine); 
+    }
+  }
+
+  // 2. Trava o máximo em 3 linhas
+  if (lines.length > 3) {
+    lines = lines.slice(0, 3);
+    lines[2] = lines[2].replace(/\s+\S*$/, '') + '...';
+  }
+
+  // 3. NOVO CÁLCULO DE CENTRALIZAÇÃO VERTICAL
+  const totalTextHeight = lines.length * lineHeight;
+  
+  // Como vamos usar o 'middle', o Y inicial será a metade do espaço livre + a metade de uma linha
+  let currentY = (headerHeight - totalTextHeight) / 2 + (lineHeight / 2);
+  
+  const centerX = xStart + (maxWidth / 2);
+
+  // 4. Prepara a caneta do Canvas
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center'; 
+  
+  // AQUELA ERA A VILÃ: Mudamos a referência vertical para o meio da letra!
+  ctx.textBaseline = 'middle'; 
+
+  // 5. Desenha as linhas na tela
+  lines.forEach(line => {
+    if (line) {
+      ctx.fillText(applySafeSpacing(line), centerX, currentY, maxWidth);
+    }
+    currentY += lineHeight;
+  });
+}
 
     function drawRichText(wrappedLines, x, y, lineHeight, fontSize) {
       let currentY = y;
@@ -370,7 +419,7 @@ const canvas = document.getElementById('preview');
         // Fallback
       }
 
-      drawWrappedHeader(fields.titulo.value, 230, 22, 250, 18);
+      drawWrappedHeader(fields.titulo.value, 230, 62, 250);
 
       const imgBox = { x: 138, y: 76, w: 230, h: 150 };
 
