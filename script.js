@@ -751,6 +751,67 @@ if (highlightPicker) {
       render();
     });
   }
+  // ===== Cor do texto selecionado =====
+const colorPicker = document.getElementById('colorPicker');
+if (colorPicker) {
+  colorPicker.addEventListener('input', () => {
+    fields.textoRich.focus();
+    document.execCommand('foreColor', false, colorPicker.value);
+    render();
+    updateToolbarState();
+  });
+}
+
+// ===== Marca-texto (fundo do texto) =====
+const highlightPicker = document.getElementById('highlightPicker');
+if (highlightPicker) {
+  highlightPicker.addEventListener('input', () => {
+    fields.textoRich.focus();
+    const color = highlightPicker.value;
+    const ok = document.execCommand('hiliteColor', false, color);
+    if (!ok) document.execCommand('backColor', false, color);
+    render();
+    updateToolbarState();
+  });
+}
+
+// ===== Atualiza estado ativo (B/I/U/Lista) =====
+function updateToolbarState() {
+  const map = [
+    { cmd: 'bold', sel: '[data-cmd="bold"]' },
+    { cmd: 'italic', sel: '[data-cmd="italic"]' },
+    { cmd: 'underline', sel: '[data-cmd="underline"]' },
+    { cmd: 'insertUnorderedList', sel: '[data-cmd="insertUnorderedList"]' },
+  ];
+  map.forEach(({ cmd, sel }) => {
+    const btn = document.querySelector(sel);
+    if (!btn) return;
+    let is = false;
+    try { is = document.queryCommandState(cmd); } catch {}
+    btn.classList.toggle('is-active', !!is);
+  });
+}
+
+// Recalcula quando o usuário muda seleção dentro do editor
+document.addEventListener('selectionchange', () => {
+  if (document.activeElement === fields.textoRich) {
+    updateToolbarState();
+  }
+});
+
+// Gatilhos extras
+fields.textoRich.addEventListener('keyup', updateToolbarState);
+fields.textoRich.addEventListener('mouseup', updateToolbarState);
+
+// Garante atualização após cliques nos botões já existentes
+document.querySelectorAll('[data-cmd]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    setTimeout(updateToolbarState, 0);
+  });
+});
+
+// Chamada inicial
+updateToolbarState();
 
   [
     fields.titulo,
