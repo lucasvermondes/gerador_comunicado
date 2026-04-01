@@ -533,7 +533,7 @@ function drawWrappedHeader(text, xStart, headerHeight, maxWidth) {
       if (imageCatalog.length) fields.imagemSelect.value = imageCatalog[0].id;
       fields.imagemCustom.value = '';
       customImage = null;
-      fields.textoRich.innerHTML = 'Prezados(as),<div><br></div>';
+      fields.textoRich.innerHTML = '';
       fields.localidade.value = '';
       fields.localidadeCustom.value = '';
       fields.evento.value = '';
