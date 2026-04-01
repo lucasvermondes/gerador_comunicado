@@ -559,12 +559,14 @@ async function render() {
   ctx.textAlign = 'center';
   ctx.font = '400 12px Calibri, Arial, sans-serif';
 
-  ctx.fillText(
-    applySafeSpacing('Para suporte, ligue para 2222 ou 0800 042 1195 ou envie um e-mail para'),
-    250,
-    footerY
-  );
-  ``
+  
+ctx.fillText(
+  applySafeSpacing(t('suporte')),
+  250,
+  footerY
+);
+``
+
 
   ctx.fillStyle = '#4A22A9';
   ctx.font = '400 16px Calibri, Arial, sans-serif';
