@@ -10,32 +10,23 @@
 </head>
 
 <body>
-  <!-- Overlay de Login -->
-  <div id="loginOverlay" class="login-overlay">
-    <div class="login-box">
-      <h2>Acesso ao Gerador</h2>
+  <!-- Overlay de Login (apenas ID) -->
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-box">
+    <h2>Acesso ao Gerador</h2>
 
-      <label for="loginId">ID TCS</label>
-      <input
-        type="text"
-        id="loginId"
-        placeholder="Somente números"
-        inputmode="numeric"
-      />
+    <label for="loginId">ID TCS</label>
+    <input
+      type="text"
+      id="loginId"
+      placeholder="Somente números"
+      inputmode="numeric"
+    />
 
-      <label for="loginAnswer">
-        Qual nome da fila no Jira do Service Desk?
-      </label>
-      <input
-        type="text"
-        id="loginAnswer"
-        placeholder="Digite a resposta"
-      />
-
-      <button id="btnLogin">Entrar</button>
-      <div class="login-error" id="loginError"></div>
-    </div>
+    <button type="button" id="btnLogin">Entrar</button>
+    <div class="login-error" id="loginError"></div>
   </div>
+</div>
 
   <!-- REMOVIDO: seletor antigo de idioma (select) -->
 
