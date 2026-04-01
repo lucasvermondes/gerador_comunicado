@@ -410,27 +410,49 @@ function drawWrappedHeader(text, xStart, headerHeight, maxWidth) {
     }
 
     function drawInfoItems(items, x, y, maxWidth, fontSize, lineHeight, gapAfterItem) {
-      let currentY = y;
-      items.forEach(item => {
-        ctx.font = `700 ${fontSize}px Calibri, Arial, sans-serif`;
-        ctx.fillStyle = '#111';
+  let currentY = y;
 
-        const labelText = item.label + ' ';
-        const labelWidth = measureTextSafe(labelText);
-        ctx.fillText(applySafeSpacing(labelText), x, currentY);
+  items.forEach(item => {
+    ctx.fillStyle = '#111';
 
-        const limitWidth = Math.max(10, maxWidth - labelWidth);
-        const valueLines = wrapPlainText(item.value, limitWidth, `${fontSize}px Calibri, Arial, sans-serif`);
+    // --- Rótulo ---
+    ctx.font = `700 ${fontSize}px Calibri, Arial, sans-serif`;
+    const labelText = item.label + ' ';
+    const labelWidth = measureTextSafe(labelText);
+    ctx.fillText(applySafeSpacing(labelText), x, currentY);
 
-        ctx.font = `${fontSize}px Calibri, Arial, sans-serif`;
-        valueLines.forEach((line, index) => {
-          ctx.fillText(applySafeSpacing(line), x + labelWidth, currentY);
-          if (index < valueLines.length - 1) currentY += lineHeight;
-        });
-        currentY += lineHeight + gapAfterItem;
-      });
-      return currentY;
+    // --- Valor ---
+    ctx.font = `400 ${fontSize}px Calibri, Arial, sans-serif`;
+    const valueLines = wrapPlainText(
+      item.value,
+      maxWidth - labelWidth,
+      ctx.font
+    );
+
+    // Primeira linha → na frente do rótulo
+    if (valueLines.length) {
+      ctx.fillText(
+        applySafeSpacing(valueLines[0]),
+        x + labelWidth,
+        currentY
+      );
     }
+
+    // Demais linhas → abaixo, alinhadas à esquerda
+    for (let i = 1; i < valueLines.length; i++) {
+      currentY += lineHeight;
+      ctx.fillText(
+        applySafeSpacing(valueLines[i]),
+        x,
+        currentY
+      );
+    }
+
+    currentY += lineHeight + gapAfterItem;
+  });
+
+  return currentY;
+}
 
     async function render() {
       updateFilenamePreview();
