@@ -17,9 +17,8 @@ const i18n = {
     localidade: 'Location:',
     inicio: 'Start:',
     fim: 'End:',
-    mudanca: 'Change number:',
-    suporte:
-      'For support, call 2222 or 0800 042 1195 or send an email to',
+    mudanca: 'Change Number:',
+    suporte: 'For support, call 2222 or 0800 042 1195 or send an email to',
   }
 };
 const langSelect = document.getElementById('langSelect');
