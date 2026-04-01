@@ -11,6 +11,31 @@
 </head>
 
 <body>
+  <div id="loginOverlay" class="login-overlay">
+  <div class="login-box">
+    <h2>Acesso ao Gerador</h2>
+
+    <label for="loginId">ID TCS</label>
+    <input
+      type="text"
+      id="loginId"
+      placeholder="Somente números"
+      inputmode="numeric"
+    />
+
+    <label for="loginAnswer">
+      Qual nome da fila no Jira do Service Desk?
+    </label>
+    <input
+      type="text"
+      id="loginAnswer"
+      placeholder="Digite a resposta"
+    />
+
+    <button id="btnLogin">Entrar</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
   <div class="app">
     <aside class="panel">
       <div class="badge">Gerador de Comunicado PNG • v5.3</div>
