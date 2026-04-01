@@ -516,47 +516,60 @@ if (highlightPicker) {
   }
 
   function drawRichText(wrappedLines, x, y, lineHeight, fontSize) {
-    let currentY = y;
-    wrappedLines.forEach(line => {
-      let currentX = x;
-      if (!line.length) { currentY += Math.round(fontSize * 0.55); return; }
+  let currentY = y;
 
-      let runs = [];
-      let currentRun = null;
+  wrappedLines.forEach(line => {
+    let currentX = x;
+    if (!line.length) { currentY += Math.round(fontSize * 0.55); return; }
 
-      line.forEach(part => {
-        if (!currentRun) {
-          currentRun = { ...part };
-        } else if (currentRun.bold === part.bold && currentRun.italic === part.italic && currentRun.underline === part.underline) {
-          currentRun.text += part.text;
-        } else {
-          runs.push(currentRun);
-          currentRun = { ...part };
-        }
-      });
-      if (currentRun) runs.push(currentRun);
+    // Agrupa runs com mesmo estilo
+    let runs = [];
+    let currentRun = null;
 
-      runs.forEach(run => {
-        setFont(fontSize, run);
-
-        const runWidth = measureTextSafe(run.text);
-        ctx.fillText(applySafeSpacing(run.text), currentX, currentY);
-
-        if (run.underline && run.text.trim()) {
-          const underlineY = currentY + Math.max(2, Math.round(fontSize * 0.10));
-          ctx.beginPath();
-          ctx.lineWidth = Math.max(1, Math.round(fontSize * 0.06));
-          ctx.strokeStyle = '#111';
-          ctx.moveTo(currentX, underlineY);
-          ctx.lineTo(currentX + runWidth, underlineY);
-          ctx.stroke();
-        }
-        currentX += runWidth;
-      });
-      currentY += lineHeight;
+    line.forEach(part => {
+      if (!currentRun) {
+        currentRun = { ...part };
+      } else if (
+        currentRun.bold === part.bold &&
+        currentRun.italic === part.italic &&
+        currentRun.underline === part.underline &&
+        (currentRun.color || null) === (part.color || null)
+      ) {
+        currentRun.text += part.text;
+      } else {
+        runs.push(currentRun);
+        currentRun = { ...part };
+      }
     });
-    return currentY;
-  }
+    if (currentRun) runs.push(currentRun);
+
+    runs.forEach(run => {
+      setFont(fontSize, run);
+
+      // aplica cor do run (se houver)
+      ctx.fillStyle = run.color || '#111';
+
+      const runWidth = measureTextSafe(run.text);
+      ctx.fillText(applySafeSpacing(run.text), currentX, currentY);
+
+      if (run.underline && run.text.trim()) {
+        const underlineY = currentY + Math.max(2, Math.round(fontSize * 0.10));
+        ctx.beginPath();
+        ctx.lineWidth = Math.max(1, Math.round(fontSize * 0.06));
+        ctx.strokeStyle = run.color || '#111';
+        ctx.moveTo(currentX, underlineY);
+        ctx.lineTo(currentX + runWidth, underlineY);
+        ctx.stroke();
+      }
+      currentX += runWidth;
+    });
+
+    currentY += lineHeight;
+  });
+
+  return currentY;
+}
+``
 
   // Ajuste solicitado: primeira linha na frente do rótulo; demais abaixo, alinhadas à esquerda
   function drawInfoItems(items, x, y, maxWidth, fontSize, lineHeight, gapAfterItem) {
