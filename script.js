@@ -137,41 +137,50 @@ document.addEventListener('DOMContentLoaded', () => {
   ========================== */
   const IMAGE_NONE = '__none__';
   const IMAGE_UPLOAD = '__upload__';
-  
+
   function populateImageSelect() {
-  if (!fields.imagemSelect) return;
-  fields.imagemSelect.innerHTML = '';
+    if (!fields.imagemSelect) return;
+    fields.imagemSelect.innerHTML = '';
 
-  // 1) Sem imagem
-  const noneOption = document.createElement('option');
-  noneOption.value = IMAGE_NONE;
-  noneOption.textContent = 'Sem imagem (texto apenas)';
-  fields.imagemSelect.appendChild(noneOption);
+    // 1) Sem imagem
+    const noneOption = document.createElement('option');
+    noneOption.value = IMAGE_NONE;
+    noneOption.textContent = 'Sem imagem (texto apenas)';
+    fields.imagemSelect.appendChild(noneOption);
 
-  // 2) Catálogo
-  imageCatalog.forEach((img) => {
-    const option = document.createElement('option');
-    option.value = img.id;
-    option.textContent = img.label;
-    fields.imagemSelect.appendChild(option);
-  });
+    // 2) Catálogo
+    imageCatalog.forEach((img) => {
+      const option = document.createElement('option');
+      option.value = img.id;
+      option.textContent = img.label;
+      fields.imagemSelect.appendChild(option);
+    });
 
-  // 3) Upload
-  const uploadOption = document.createElement('option');
-  uploadOption.value = IMAGE_UPLOAD;
-  uploadOption.textContent = 'Outro (upload de imagem)';
-  fields.imagemSelect.appendChild(uploadOption);
+    // 3) Upload
+    const uploadOption = document.createElement('option');
+    uploadOption.value = IMAGE_UPLOAD;
+    uploadOption.textContent = 'Outro (upload de imagem)';
+    fields.imagemSelect.appendChild(uploadOption);
 
-  // Se quiser já abrir sem imagem por padrão:
-  // fields.imagemSelect.value = IMAGE_NONE;
-}
+    // Se quiser já abrir sem imagem por padrão:
+    // fields.imagemSelect.value = IMAGE_NONE;
+  }
 
 
   function getImageSource() {
     if (!fields.imagemSelect) return null;
-    if (fields.imagemSelect.value === '__upload__') return customImage;
-    const selected = imageCatalog.find(img => img.id === fields.imagemSelect.value);
+    const val = fields.imagemSelect.value;
+    if (val === IMAGE_NONE) return null;
+    if (val === IMAGE_UPLOAD) return customImage;
+    const selected = imageCatalog.find(img => img.id === val);
     return selected ? selected.src : null;
+  }
+
+  function hasSelectedImage() {
+    const val = fields.imagemSelect?.value;
+    if (val === IMAGE_NONE) return false;
+    if (val === IMAGE_UPLOAD) return !!customImage;
+    return !!getImageSource();
   }
 
   function loadImage(src) {
@@ -396,13 +405,20 @@ document.addEventListener('DOMContentLoaded', () => {
   function chooseLayout() {
     let fontSize = 17;
     let chosen = null;
+
+    const hasImg = hasSelectedImage();
+    const startYNoImg = 100;   // header + margem
+    const startYWithImg = 250; // como antes
+
     while (fontSize >= 11) {
       const rich = estimateRichHeight(fontSize, 430);
+      const startY = hasImg ? startYWithImg : startYNoImg;
+
       const info = estimateInfoHeight(430, fontSize);
-      const startY = 250;
       const infoStartY = startY + rich.height + 18;
       const footerY = Math.max(620, infoStartY + info.height + 24);
       const canvasHeight = footerY + 46;
+
       if (canvasHeight <= 940 || fontSize === 11) {
         chosen = { fontSize, rich, info, startY, infoStartY, footerY, canvasHeight };
         break;
@@ -782,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const btn = document.querySelector(sel);
       if (!btn) return;
       let is = false;
-      try { is = document.queryCommandState(cmd); } catch {}
+      try { is = document.queryCommandState(cmd); } catch { }
       btn.classList.toggle('is-active', !!is);
     });
   }
