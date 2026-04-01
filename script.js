@@ -1,5 +1,9 @@
 let currentLang = 'pt';
-
+// ===== LOGIN POR SESSÃO (apenas ID) =====
+const loginOverlay = document.getElementById('loginOverlay');
+const btnLogin = document.getElementById('btnLogin');
+const loginIdInput = document.getElementById('loginId');
+const loginError = document.getElementById('loginError');
 const i18n = {
   pt: {
     evento: 'Evento:',
@@ -673,11 +677,7 @@ render();
 document.addEventListener('contextmenu', function (event) {
   event.preventDefault();
 });
-// ===== LOGIN POR SESSÃO (apenas ID) =====
-const loginOverlay = document.getElementById('loginOverlay');
-const btnLogin = document.getElementById('btnLogin');
-const loginIdInput = document.getElementById('loginId');
-const loginError = document.getElementById('loginError');
+
 
 // Mostra usuário conectado no badge
 function showUser(id) {
