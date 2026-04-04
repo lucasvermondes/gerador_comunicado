@@ -140,6 +140,8 @@
       </div>
 
       <div class="actions">
+        <button class="secondary" id="btnImportExcel" type="button">Importar Excel</button>
+        <input type="file" id="excelFile" accept=".xlsx,.xls" class="hidden" />
         <button class="primary" id="btnDownload">Baixar PNG</button>
         <button class="secondary" id="btnReset">Restaurar modelo</button>
       </div>
@@ -152,7 +154,7 @@
       </div>
     </main>
   </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <script src="script.js"></script>
 </body>
 

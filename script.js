@@ -79,6 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnReset = document.getElementById('btnReset');
   const btnParagraph = document.getElementById('btnParagraph');
   const btnClearFormatting = document.getElementById('btnClearFormatting');
+  const btnImportExcel = document.getElementById('btnImportExcel');
+  const excelFile = document.getElementById('excelFile');
+  
 
   const imageCatalog = Array.isArray(window.COMUNICADO_IMAGES) ? window.COMUNICADO_IMAGES : [];
   let customImage = null;
@@ -130,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!text) return 0;
     return ctx.measureText(applySafeSpacing(text)).width;
   }
+  
 
   /* ==========================
      IMAGENS
@@ -164,6 +168,145 @@ document.addEventListener('DOMContentLoaded', () => {
     // Se quiser já abrir sem imagem por padrão:
     // fields.imagemSelect.value = IMAGE_NONE;
   }
+  function escapeHtml(text) {
+  return String(text || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getSheetCell(sheet, address) {
+  const cell = sheet?.[address];
+  if (!cell || cell.v == null) return '';
+  return String(cell.v).trim();
+}
+
+function normalizeLookup(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function setLocalidadeFromExcel(value) {
+  const normalized = normalizeLookup(value);
+
+  if (!normalized) {
+    fields.localidade.value = '';
+    fields.localidadeCustom.value = '';
+    toggleLocalidadeCustom();
+    return;
+  }
+
+  const options = Array.from(fields.localidade.options || []);
+  const found = options.find(opt => normalizeLookup(opt.value) === normalized);
+
+  if (found) {
+    fields.localidade.value = found.value;
+    fields.localidadeCustom.value = '';
+  } else {
+    fields.localidade.value = '__custom__';
+    fields.localidadeCustom.value = value;
+  }
+
+  toggleLocalidadeCustom();
+}
+
+function setImageFromTemplateName(templateName) {
+  const normalized = normalizeLookup(templateName);
+  if (!normalized) return false;
+
+  if (
+    normalized === normalizeLookup('Sem imagem') ||
+    normalized === normalizeLookup('Sem imagem (texto apenas)')
+  ) {
+    fields.imagemSelect.value = IMAGE_NONE;
+    toggleImageUpload();
+    return true;
+  }
+
+  const found = imageCatalog.find(img =>
+    normalizeLookup(img.label) === normalized ||
+    normalizeLookup(img.id) === normalized
+  );
+
+  if (!found) return false;
+
+  fields.imagemSelect.value = found.id;
+  if (fields.imagemCustom) fields.imagemCustom.value = '';
+  customImage = null;
+  toggleImageUpload();
+  return true;
+}
+
+async function importExcelStandard(file) {
+  if (!file) return;
+
+  if (typeof XLSX === 'undefined') {
+    alert('A biblioteca XLSX não foi carregada.');
+    return;
+  }
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+
+    const firstSheetName = workbook.SheetNames[0];
+    const communicationSheetName = workbook.SheetNames.find(
+      name => normalizeLookup(name) === normalizeLookup('8 - communication')
+    ) || workbook.SheetNames[workbook.SheetNames.length - 1];
+
+    const firstSheet = workbook.Sheets[firstSheetName];
+    const communicationSheet = workbook.Sheets[communicationSheetName];
+
+    if (!firstSheet || !communicationSheet) {
+      alert('Não foi possível localizar as planilhas esperadas no arquivo Excel.');
+      return;
+    }
+
+    const titulo = getSheetCell(firstSheet, 'C7');
+    const localidade = getSheetCell(communicationSheet, 'F19');
+    const descricao = getSheetCell(communicationSheet, 'F21');
+    const servicos1 = getSheetCell(communicationSheet, 'F23');
+    const servicos2 = getSheetCell(communicationSheet, 'F25');
+    const inicio = getSheetCell(communicationSheet, 'F26');
+    const fim = getSheetCell(communicationSheet, 'F28');
+    const mudancaNumero = getSheetCell(communicationSheet, 'F30');
+    const nomeTemplateImagem = getSheetCell(communicationSheet, 'B16');
+
+    // Preenche campos
+    fields.titulo.value = titulo;
+    fields.textoRich.innerHTML = escapeHtml(descricao).replace(/\r?\n/g, '<br>');
+    fields.servicosAfetados.value = [servicos1, servicos2].filter(Boolean).join('\n');
+    fields.inicio.value = inicio;
+    fields.fim.value = fim;
+    fields.mudancaNumero.value = mudancaNumero;
+
+    // Localidade
+    setLocalidadeFromExcel(localidade);
+
+    // Evento (não informado no mapeamento)
+    // Se quiser limpar sempre ao importar, descomente:
+    // fields.evento.value = '';
+
+    // Imagem por nome de template
+    const imageMatched = setImageFromTemplateName(nomeTemplateImagem);
+    if (!imageMatched && nomeTemplateImagem) {
+      console.warn('Template de imagem não encontrado no catálogo:', nomeTemplateImagem);
+    }
+
+    if (typeof syncEditorEmptyState === 'function') syncEditorEmptyState();
+
+    render();
+  } catch (error) {
+    console.error(error);
+    alert('Não foi possível ler o Excel padrão. Verifique se o arquivo está correto.');
+  }
+}
 
 
   function getImageSource() {
@@ -858,6 +1001,19 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.readAsDataURL(file);
     });
   }
+  if (btnImportExcel && excelFile) {
+  btnImportExcel.addEventListener('click', () => excelFile.click());
+
+  excelFile.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    await importExcelStandard(file);
+
+    // Permite importar o mesmo arquivo novamente
+    e.target.value = '';
+  });
+}
 
   if (btnDownload) btnDownload.addEventListener('click', downloadPng);
   if (btnReset) btnReset.addEventListener('click', resetDefaults);
@@ -919,11 +1075,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   if (loginIdInput) {
-  loginIdInput.addEventListener('input', () => {
-    loginIdInput.value = loginIdInput.value.replace(/\D+/g, '');
-    if (loginError) loginError.textContent = '';
-  });
-}
+    loginIdInput.addEventListener('input', () => {
+      loginIdInput.value = loginIdInput.value.replace(/\D+/g, '');
+      if (loginError) loginError.textContent = '';
+    });
+  }
 
   checkLogin();
 });
