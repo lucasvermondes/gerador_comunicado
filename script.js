@@ -868,9 +868,9 @@ document.addEventListener('DOMContentLoaded', () => {
   render();
 
   // Desabilita o clique com o botão direito no site todo
-  document.addEventListener('contextmenu', function (event) {
+  /* document.addEventListener('contextmenu', function (event) {
     event.preventDefault();
-  });
+  }); */
 
   /* ==========================
      LOGIN POR SESSÃO (apenas ID)
@@ -918,6 +918,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'Enter') tryLogin();
     });
   }
+  if (loginIdInput) {
+  loginIdInput.addEventListener('input', () => {
+    loginIdInput.value = loginIdInput.value.replace(/\D+/g, '');
+    if (loginError) loginError.textContent = '';
+  });
+}
 
   checkLogin();
 });
