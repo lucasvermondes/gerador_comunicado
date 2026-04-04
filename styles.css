@@ -23,25 +23,30 @@ body {
   font-family: Calibri, Arial, Helvetica, sans-serif;
   color: var(--texto);
   background: #f5f7fb;
+  overflow: hidden; /* evita rolagem da página inteira no desktop */
 }
+
 
 .app {
   display: grid;
-  grid-template-columns: minmax(360px, 430px) minmax(540px, 1fr);
+  grid-template-columns: minmax(360px, 430px) 1fr;
   gap: 24px;
-  min-height: 100vh;
-  align-items: start;
+  height: 100vh;
   padding: 16px;
+  align-items: start;
 }
+
+
 
 .panel {
   background: var(--painel);
   padding: 20px;
   border: 1px solid var(--borda);
   border-radius: 16px;
-  overflow: auto;
-  min-height: calc(100vh - 32px);
+  overflow-y: auto;
+  height: calc(100vh - 32px);
 }
+
 
 .panel h1 {
   margin: 0 0 8px;
@@ -247,7 +252,12 @@ button.secondary {
   border: 1px solid #dcd3fc;
 }
 
+
 .preview-wrap {
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  height: calc(100vh - 32px);
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
@@ -255,17 +265,18 @@ button.secondary {
   overflow: auto;
 }
 
+
 .preview-card {
   background: #fff;
   padding: 18px;
   border-radius: 16px;
   box-shadow: 0 10px 35px rgba(33, 41, 68, 0.12);
   width: fit-content;
-  position: sticky;
-  top: 16px;
+  max-width: 100%;
 }
 
 .preview-title { margin: 0 0 12px; font-size: 16px; color: #333; }
+
 
 canvas {
   display: block;
@@ -274,6 +285,7 @@ canvas {
   border: 1px solid var(--borda);
   background: #fff;
 }
+
 
 .hidden { display: none; }
 
@@ -395,4 +407,50 @@ canvas {
 /* Marcado (EN) – POSIÇÃO da bolinha */
 .switch input:checked + .slider::before {
   left: 24px; /* 44 - 18 - 2 = 24 → direita */
+}
+@media (max-width: 1020px) {
+  body {
+    overflow: auto;
+  }
+
+  .app {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 16px;
+    padding: 12px;
+  }
+
+  .panel {
+  background: var(--painel);
+  padding: 20px;
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 32px);
+
+  /* esconder scrollbar sem perder rolagem */
+  -ms-overflow-style: none;   /* IE e Edge antigo */
+  scrollbar-width: none;      /* Firefox */
+}
+
+.panel::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;              /* Chrome, Edge, Safari */
+}
+
+  .preview-wrap {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .preview-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  canvas {
+    width: min(500px, 100%);
+  }
 }
