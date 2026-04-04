@@ -106,9 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function buildFileName(displayMode = false) {
     const { yyyy, mm, dd } = getTodayParts();
     const titulo = sanitizePart(fields.titulo.value || 'Sem título');
-    const rfc = sanitizePart(fields.rfc.value || 'RFC');
     const datePart = displayMode ? `${yyyy}/${mm}/${dd}` : `${yyyy}-${mm}-${dd}`;
-    return `${datePart} - ${rfc} - ${titulo}`;
+    return `${datePart} - ${titulo}`;
   }
 
   function updateFilenamePreview() {
@@ -720,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (imageCatalog.length) fields.imagemSelect.value = imageCatalog[0].id;
     if (fields.imagemCustom) fields.imagemCustom.value = '';
     customImage = null;
-    fields.textoRich.innerHTML = 'Prezados(as),<div><br></div>';
+    fields.textoRich.innerHTML = '';
     fields.localidade.value = '';
     fields.localidadeCustom.value = '';
     fields.evento.value = '';
