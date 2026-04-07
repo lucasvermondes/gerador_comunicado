@@ -881,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fields.inicio.value = '';
     fields.fim.value = '';
     fields.mudancaNumero.value = '';
-    fields.rfc.value = '';
+    /* fields.rfc.value = ''; */
     toggleLocalidadeCustom();
     toggleImageUpload();
     render();
