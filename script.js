@@ -974,7 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fields.inicio,
     fields.fim,
     fields.mudancaNumero,
-    fields.rfc,
+    /* fields.rfc, */
     fields.localidadeCustom
   ].forEach(el => {
     if (!el) return;
