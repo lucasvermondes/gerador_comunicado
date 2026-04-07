@@ -1,0 +1,36 @@
+{
+  "name": "gerador-comunicados-png",
+  "version": "1.0.0",
+  "description": "Aplicativo desktop para gerar comunicados PNG",
+  "main": "main.js",
+  "author": "Lucas",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "electron": "^36.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.empresa.geradorcomunicadospng",
+    "productName": "Gerador de Comunicados PNG",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    }
+  }
+}
