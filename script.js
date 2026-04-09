@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const i18n = {
     pt: {
+      descricao: 'Descrição da atividade:',
       evento: 'Evento:',
       servicos: 'Serviços afetados:',
       localidade: 'Localidade:',
@@ -15,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
       suporte: 'Para suporte, ligue para 2222 ou 0800 042 1195 ou envie um e-mail para',
     },
     en: {
+      descricao: 'Activity description:',
       evento: 'Event:',
       servicos: 'Affected services:',
       localidade: 'Location:',
@@ -56,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ========================== */
   const canvas = document.getElementById('preview');
   const ctx = canvas.getContext('2d');
+  const PNG_SCALE = 3; // use 3 se quiser ainda mais nitidez
 
   const fields = {
     titulo: document.getElementById('titulo'),
@@ -122,6 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function getLocalidadeValue() {
     if (fields.localidade.value === '__custom__') return fields.localidadeCustom.value.trim();
     return fields.localidade.value.trim();
+  }
+
+  function getDescricaoValue() {
+    return fields.textoRich.innerText
+      .replace(/\u00a0/g, ' ')
+      .replace(/\n{2,}/g, '\n')
+      .trim();
   }
 
   // Segurança de espaços no iOS/Safari
@@ -522,18 +532,23 @@ document.addEventListener('DOMContentLoaded', () => {
   ========================== */
   function getInfoItems() {
     const items = [];
+
+    const descricao = getDescricaoValue();
     const localidade = getLocalidadeValue();
     const evento = fields.evento.value.trim();
     const servicosAfetados = fields.servicosAfetados.value.trim();
     const inicio = fields.inicio.value.trim();
     const fim = fields.fim.value.trim();
     const mudancaNumero = fields.mudancaNumero.value.trim();
+
+    if (descricao) items.push({ label: t('descricao'), value: descricao });
     if (localidade) items.push({ label: t('localidade'), value: localidade });
     if (evento) items.push({ label: t('evento'), value: evento });
     if (servicosAfetados) items.push({ label: t('servicos'), value: servicosAfetados });
     if (inicio) items.push({ label: t('inicio'), value: inicio });
     if (fim) items.push({ label: t('fim'), value: fim });
     if (mudancaNumero) items.push({ label: t('mudanca'), value: mudancaNumero });
+
     return items;
   }
 
@@ -560,26 +575,28 @@ document.addEventListener('DOMContentLoaded', () => {
     let chosen = null;
 
     const hasImg = hasSelectedImage();
-    const startYNoImg = 100;   // header + margem
-    const startYWithImg = 250; // como antes
+    const startYNoImg = 100;
+    const startYWithImg = 250;
 
     while (fontSize >= 11) {
-      const rich = estimateRichHeight(fontSize, 430);
       const startY = hasImg ? startYWithImg : startYNoImg;
 
       const info = estimateInfoHeight(430, fontSize);
-      const infoStartY = startY + rich.height + 18;
+      const infoStartY = startY;
       const footerY = Math.max(620, infoStartY + info.height + 24);
       const canvasHeight = footerY + 46;
 
       if (canvasHeight <= 940 || fontSize === 11) {
-        chosen = { fontSize, rich, info, startY, infoStartY, footerY, canvasHeight };
+        chosen = { fontSize, info, startY, infoStartY, footerY, canvasHeight };
         break;
       }
+
       fontSize -= 1;
     }
+
     return chosen;
   }
+
 
   // Cabeçalho com ajuste automático de fonte e 3 linhas máx.
   function drawWrappedHeader(text, xStart, headerHeight, maxWidth) {
@@ -771,14 +788,33 @@ document.addEventListener('DOMContentLoaded', () => {
   async function render() {
     updateFilenamePreview();
     const layout = chooseLayout();
-    canvas.width = 500;
-    canvas.height = Math.ceil(layout.canvasHeight);
 
+    const logicalWidth = 500;
+    const logicalHeight = Math.ceil(layout.canvasHeight);
+
+    // Canvas interno em alta resolução
+    canvas.width = logicalWidth * PNG_SCALE;
+    canvas.height = logicalHeight * PNG_SCALE;
+
+    // Mantém o tamanho visual do preview
+    canvas.style.width = `${logicalWidth}px`;
+    canvas.style.height = `${logicalHeight}px`;
+
+    // Reseta e aplica escala
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(PNG_SCALE, 0, 0, PNG_SCALE, 0, 0);
+
+    // Melhora o tratamento de imagem
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    // Agora desenha tudo usando medidas "normais"
     ctx.fillStyle = '#ececec';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
     ctx.fillStyle = '#300382';
-    ctx.fillRect(0, 0, canvas.width, 62);
+    ctx.fillRect(0, 0, logicalWidth, 62);
 
     try {
       const logo = await loadImage('./assets/header.svg');
@@ -830,7 +866,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
 
-    drawRichText(layout.rich.wrapped, 36, layout.startY, layout.rich.lineHeight, layout.fontSize);
+
     drawInfoItems(layout.info.items, 36, layout.infoStartY, 430, layout.fontSize, layout.info.lineHeight, layout.info.gapAfterItem);
 
     const footerY = Math.ceil(layout.footerY);
