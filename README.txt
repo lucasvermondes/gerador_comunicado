@@ -1,4 +1,4 @@
-# Gerador de Comunicados PNG • v5.2
+# Gerador de Comunicados PNG
 
 ## Como trocar ou adicionar artes
 ### Trocar uma imagem existente
