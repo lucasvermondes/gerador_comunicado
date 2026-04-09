@@ -1,9 +1,9 @@
 {
   "name": "gerador-comunicados-png",
-  "version": "1.0.0",
+  "version": "6.2.0",
   "description": "Aplicativo desktop para gerar comunicados PNG",
   "main": "main.js",
-  "author": "Lucas",
+  "author": "Lucas Vermondes",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win"
